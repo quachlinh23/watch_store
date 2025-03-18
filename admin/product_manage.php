@@ -8,13 +8,30 @@ $br = new brand();
 $category = new category();
 
 // Xử lý thêm sản phẩm
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && !isset($_POST['product_id'])) {
     $insert_product = $pr->insert($_POST, $_FILES);
     if (isset($insert_product)) {
         echo "<script>alert('$insert_product');</script>";
     }
 }
 
+// Xử lý sửa sản phẩm
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && isset($_POST['product_id'])) {
+    $product_id = intval($_POST['product_id']);
+    $update_data = [
+        'product_name' => $_POST['product_name'],
+        'product_desc' => $_POST['product_desc'],
+        'product_type' => $_POST['product_type'],
+        'product_brand' => $_POST['product_brand'],
+        'product_price' => $_POST['product_price'] // Thêm nếu cần
+    ];
+    $update_product = $pr->update($product_id, $update_data, $_FILES);
+    if (isset($update_product)) {
+        echo "<script>alert('$update_product');</script>";
+    }
+}
+
+// Xử lý đổi trạng thái
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangThai'])) {
     $id = intval($_POST['id']);
     $status = intval($_POST['trangThai']);
@@ -198,15 +215,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             <table class="table_slider">
                 <thead>
                     <tr>
-                        <tr>
-                            <th style="width: 5%;">M.SP</th>
-                            <th style="width: 25%;">Tên sản phẩm</th>
-                            <th style="width: 20%;">Loại sản phẩm</th>
-                            <th style="width: 15%;">Thương hiệu</th>
-                            <th style="width: 15%;">Ảnh</th>
-                            <th style="width: 15%;">Trạng thái</th>
-                            <th style="width: 5%;">Hành động</th>
-                        </tr>
+                        <th style="width: 5%;">M.SP</th>
+                        <th style="width: 25%;">Tên sản phẩm</th>
+                        <th style="width: 20%;">Loại sản phẩm</th>
+                        <th style="width: 15%;">Thương hiệu</th>
+                        <th style="width: 15%;">Ảnh</th>
+                        <th style="width: 15%;">Trạng thái</th>
+                        <th style="width: 5%;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -223,28 +238,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             echo "<td>{$result['tenThuongHieu']}</td>";
                             echo "<td><img src='{$result['hinhAnh']}' alt='' class='product_image' style='max-width: 100px;'></td>";
                             echo "<td>" . ($result['trangthai'] == 1 ? "Còn kinh doanh" : "Ngừng kinh doanh") . "</td>";
-                            // echo "<td class='btn-container'>";
-                            // echo "<div class='btn-action btn-edit' onclick='editProduct({$result['maSanPham']})'><i class='fa-solid fa-pen'></i></div>";
-                            // echo '<button type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
-                            //     <i class="fa-solid fa-rotate"></i>
-                            // </button>';
-
-                            // echo "</td>";
-
                             echo '<td class="btn-container">
-                                <form action="" method="POST">
-                                    <input type="hidden" name="id" value="' . $result['maSanPham'] . '">
-                                    <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
-                                    <button style="margin-left: 30px;" type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
-                                        <i class="fa-solid fa-rotate"></i>
-                                    </button>
-                                </form>
-                            </td>';
-
+                                    <a href="javascript:void(0)" title="Sửa" class="btn-action btn-edit" data-id="' . $result['maSanPham'] . '">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form action="" method="POST">
+                                        <input type="hidden" name="id" value="' . $result['maSanPham'] . '">
+                                        <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
+                                        <button type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
+                                            <i class="fa-solid fa-rotate"></i>
+                                        </button>
+                                    </form>
+                                </td>';
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='6'>Không có dữ liệu sản phẩm</td></tr>";
+                        echo "<tr><td colspan='7'>Không có dữ liệu sản phẩm</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -256,6 +265,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
     <script>
         let selectedFilesAdd = [];
         let selectedFilesEdit = [];
+        let products = <?php
+            $products = [];
+            $prList = $pr->show();
+            if ($prList && $prList->num_rows > 0) {
+                while ($result = $prList->fetch_assoc()) {
+                    $products[] = $result;
+                }
+            }
+            echo json_encode($products);
+        ?>;
 
         function previewMainImage(input, previewId) {
             const previewContainer = document.getElementById(previewId);
@@ -285,14 +304,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                     return;
                 }
 
-                selectedFiles.length = 0; // Xóa danh sách cũ
+                selectedFiles.length = 0;
                 for (let i = 0; i < files.length; i++) {
                     selectedFiles.push(files[i]);
                 }
 
-                // Thay thế placeholder bằng ảnh thật
                 selectedFiles.forEach((file, index) => {
-                    if (index < 3) { // Giới hạn 3 ảnh
+                    if (index < 3) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const img = document.createElement('img');
@@ -304,7 +322,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                     }
                 });
 
-                // Nếu chọn ít hơn 3 ảnh, giữ lại placeholder còn lại
                 if (files.length < 3) {
                     for (let i = files.length; i < 3; i++) {
                         if (!placeholders[i].parentNode) {
@@ -371,25 +388,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
         }
 
         function editProduct(id) {
-            fetch(`get_product.php?id=${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-                    document.getElementById('product_id_edit').value = id;
-                    document.getElementById('product_name_edit').value = data.tenSanPham;
-                    document.getElementById('desc_edit').value = data.moTa;
-                    document.getElementById('product_type_edit').value = data.id_loai;
-                    document.getElementById('product_brand_edit').value = data.id_thuonghieu;
-                    document.getElementById('product_price_edit').value = data.giaban;
-                    document.getElementById('main-image-preview-edit').innerHTML = `<img src="${data.hinhAnh}" class="image-preview">`;
-                    const previewEdit = document.getElementById('image-preview-edit');
-                    previewEdit.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
-                    document.getElementById('edit-modal').style.display = 'flex';
-                })
-                .catch(error => console.error('Lỗi khi lấy dữ liệu sản phẩm:', error));
+            const data = products.find(p => p.maSanPham == id);
+            if (!data) {
+                alert('Không tìm thấy sản phẩm với ID: ' + id);
+                return;
+            }
+            document.getElementById('product_id_edit').value = id;
+            document.getElementById('product_name_edit').value = data.tenSanPham || '';
+            document.getElementById('desc_edit').value = data.moTa || '';
+            document.getElementById('product_type_edit').value = data.id_loai || '0';
+            document.getElementById('product_brand_edit').value = data.id_thuonghieu || '0';
+            document.getElementById('product_price_edit').value = data.giaban || '';
+            document.getElementById('main-image-preview-edit').innerHTML = data.hinhAnh ? `<img src="${data.hinhAnh}" class="image-preview">` : '';
+            const previewEdit = document.getElementById('image-preview-edit');
+            previewEdit.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
+            document.getElementById('edit-modal').style.display = 'flex';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -430,6 +443,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                 form.addEventListener('submit', (event) => {
                     if (!validateForm(modals[modalId].formId)) {
                         event.preventDefault();
+                    }
+                });
+            });
+
+            // Thêm sự kiện cho nút "Sửa"
+            document.querySelectorAll('.btn-edit').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const link = e.target.closest('a');
+                    if (link && link.classList.contains('btn-edit')) {
+                        const id = link.getAttribute('data-id');
+                        if (id) {
+                            editProduct(parseInt(id));
+                        }
+                        e.preventDefault(); // Ngăn chặn hành vi mặc định của <a>
                     }
                 });
             });
