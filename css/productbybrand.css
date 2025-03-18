@@ -1,0 +1,296 @@
+.product_brands {
+    display: flex;
+    width: 90%;
+    margin: 0 auto;
+    margin-top: 100px;
+    height: 420px;
+}
+
+.product_brands_left {
+    width: 20%;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ cho khung */
+}
+
+.product_brands_left a img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transition: transform 0.3s ease; /* Thêm hiệu ứng khi hover */
+}
+
+.product_brands_left a img:hover {
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+.product_brands_right {
+    width: 80%;
+    height: 100%;
+    background-color: rgb(130,1,8);
+}
+
+.product_brands_right_top {
+    width: 100%;
+    height: 15%;
+    text-align: center;
+    position: relative;
+}
+
+.brand_name {
+    top: 20%;
+    font-size: 40px;
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+    color: white;
+    /* text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8); */
+    overflow: hidden;
+}
+
+/* Hiệu ứng ánh sáng trượt */
+.brand_name::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 70%);
+    transform: skewX(-25deg);
+    animation: shine 2s infinite linear;
+}
+
+
+
+.product_by_brand_details {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    text-decoration: none;
+}
+
+.product_by_brand_details:hover{
+    scale: 1.1;
+}
+
+.product_brands_right_bottom {
+    width: 100%;
+    display: flex;
+    height: 85%;   
+}
+
+.product_1 {
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgb(231,238,241);
+    background-color: #fff;
+    padding: 10px;
+    box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+.product_1:hover {
+    transform: translateY(-5px); /* Di chuyển lên nhẹ khi hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ */
+}
+
+.product_1 .pro_img a img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
+
+.pro_name p {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.pro_name p:hover {
+    color: rgb(79,151,224); /* Màu khi hover */
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+.pro_price p {
+    font-size: 24px;
+    color: red;
+    font-weight: bold;
+    margin: 5px 0;
+    transition: transform 0.3s ease;
+}
+
+.pro_price p:hover {
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+/* Section sản phẩm */
+.product_new {
+    background-color: #ff3333;;
+    width: 90%;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.product_new_top {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+/* Ảnh tiêu đề */
+.product_new_top img {
+    width: 100%;
+    display: block;
+}
+
+/* Hiệu ứng ánh sáng trượt */
+.product_new_top::before {
+    content: "";
+    position: absolute;
+    top: -150%;  /* Xuất hiện từ ngoài khung */
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(70deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 70%);
+    transform: skewX(-20deg);
+    filter: blur(10px); /* Làm mờ để tạo cảm giác ánh sáng mềm mại */
+    animation: shine1 5s infinite ease-in-out;
+}
+
+/* Keyframes ánh sáng trượt */
+@keyframes shine1 {
+    0% {
+        top: -150%;
+        left: -150%;
+    }
+    100% {
+        top: 150%;
+        left: 150%;
+    }
+}
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Danh sách sản phẩm */
+.product_new_bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+/* Sản phẩm */
+.product_new_bottom .product_1 {
+    width: 18%;
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.product_new_bottom .product_1:hover {
+    transform: scale(1.05);
+}
+
+/* Hình ảnh sản phẩm */
+.product_new_bottom .pro_img img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+/* Tên và giá sản phẩm */
+.product_new_bottom .descrise {
+    margin-top: 10px;
+}
+
+.product_new_bottom .pro_name p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.product_new_bottom .pro_price p {
+    font-size: 14px;
+    color: #e60000;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+    .product_1 {
+        width: 30%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .product_1 {
+        width: 45%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .product_1 {
+        width: 100%;
+    }
+}
+
+.hidden {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.btns_filter {
+    position: absolute;
+    left: 10px;
+    top: 80px;
+}
+
+.btns_filter button {
+    padding: 8px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: #fff;
+    color: rgb(130,1,8);
+    font-weight: bold;
+}
+
+/* Khi button được chọn (active) */
+.btns_filter button.active {
+    background-color: #ff9800;
+    color: white;
+    border-color: #ff9800;
+}

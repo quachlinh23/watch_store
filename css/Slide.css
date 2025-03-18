@@ -1,0 +1,115 @@
+/* Tổng container */
+.slider-container {
+    width: 100%;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #222, #111);
+}
+
+/* Khung slider */
+.slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Chứa tất cả slide */
+.slides {
+    display: flex;
+    transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Mỗi slide */
+.slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+/* Ảnh */
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    transition: transform 0.5s ease-in-out;
+}
+
+/* Hiệu ứng ảnh khi hover */
+.slide img:hover {
+    transform: scale(1.05);
+}
+
+/* Nút điều hướng */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    width: 55px;
+    height: 55px;
+    cursor: pointer;
+    font-size: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.4s;
+    opacity: 0;
+    visibility: hidden;
+    backdrop-filter: blur(10px); /* Hiệu ứng mờ nền */
+}
+
+/* Khi hover vào slider thì hiện nút */
+.slider:hover .prev, 
+.slider:hover .next {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Vị trí */
+.prev { left: 15px; }
+.next { right: 15px; }
+
+/* Hiệu ứng hover nút */
+.prev:hover, .next:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: black;
+    transform: scale(1.1);
+}
+
+/* Dots */
+.dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+/* Dot thiết kế đẹp */
+.dot {
+    width: 14px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Dot active */
+.dot.active {
+    background: #ff5722;
+    transform: scale(1.4);
+    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.6);
+}

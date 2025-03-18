@@ -1,0 +1,173 @@
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+html, body {
+    height: 100vh; /* Chiếm toàn bộ chiều cao màn hình */
+    overflow: hidden; /* Không có thanh cuộn trên toàn bộ trang */
+    background: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    height: 70px; /* Chiều cao cố định cho header */
+    flex-shrink: 0;
+}
+
+.slogan {
+    font-size: 16px;
+    font-style: italic;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 1s ease-in-out forwards, typing 4s steps(40, end) 1s forwards;
+}
+
+/* Hiệu ứng gõ chữ */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+/* Hiệu ứng fade-in */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo_shop img {
+    height: 50px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.logo_shop img:hover {
+    transform: scale(1.2);
+}
+
+.logout span {
+    font-size: 16px;
+}
+
+.logout_content .logout ,.visit{
+    color: #f1c40f;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.logout_content .logout:hover , .visit:hover{
+    color: red;
+}
+
+/* Container */
+.container {
+    display: flex;
+    flex-grow: 1; /* Chiếm toàn bộ phần còn lại của màn hình */
+    overflow: hidden; /* Không tạo thanh cuộn ngoài ý muốn */
+}
+
+.slogan {
+    font-size: 16px;
+    font-style: italic;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 1s ease-in-out forwards, typing 4s steps(40, end) 1s forwards;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #fff;
+    padding: 20px;
+    max-height: calc(100vh - 70px); /* Giới hạn chiều cao để tránh tràn */
+    overflow-y: auto; /* Nếu nội dung quá nhiều thì có cuộn dọc */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease-in-out;
+    flex-shrink: 0; /* Đảm bảo sidebar không bị co lại */
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    padding: 14px;
+    margin: 10px 0;
+    background: #3498db;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.sidebar ul li:hover {
+    background: #1abc9c;
+    transform: translateX(5px);
+    color: white;
+}
+
+/* Active tab */
+.sidebar ul li.active {
+    background: #1abc9c;
+    color: white;
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.8);
+}
+
+
+/* Main Content */
+.content_right {
+    flex: 1; /* Chiếm toàn bộ không gian còn lại */
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    margin: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    overflow: auto; /* Nếu nội dung quá nhiều thì chỉ phần này có cuộn */
+}
+
+/* Footer */
+.footer {
+    background: #3498db;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}

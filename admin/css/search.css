@@ -1,0 +1,74 @@
+/* Container chứa ô tìm kiếm và nút Thêm */
+.search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+/* Form tìm kiếm */
+.search-input {
+    position: absolute;
+    display: flex;
+    left: 0;
+}
+
+/* Ô tìm kiếm */
+.search-input input[type="text"] {
+    padding: 8px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.search-input input[type="text"]:focus {
+    border-color: #008CBA;
+    outline: none;
+}
+
+/* Nút tìm kiếm */
+.search-input button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.search-input button:hover {
+    background-color: #45a049;
+}
+
+/* Nút Thêm */
+.btn-add {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-add:hover {
+    background-color: #007bb5;
+}
+
+/* Biểu tượng trong nút */
+.btn-add i,
+.search-form button i {
+    font-size: 14px;
+}

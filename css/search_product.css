@@ -1,0 +1,425 @@
+/* Mở bộ lọc */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background-color: white;
+    width: 750px;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+    color: black;
+    max-height: 600px;
+    min-height: 300px;
+}
+
+.bootom-modal{
+    max-height: 500px;
+    min-height: 300px;
+    overflow-y: auto;
+}
+
+
+/* Hiệu ứng mở modal */
+@keyframes fadeIn {
+    from {
+        transform: translateY(-15px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Nút đóng modal */
+.close {
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    transition: 0.3s ease;
+}
+
+.close:hover {
+    color: #d32f2f;
+    transform: scale(1.1);
+}
+.brand-filter:hover{
+    color: #00bcd4;
+}
+
+/* Tiêu đề */
+h3 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: #333;
+    color: black;
+    font-weight: bold;
+}
+
+/* Nhóm lọc */
+h4 {
+    font-size: 17px;
+    margin: 12px 0 8px;
+    color: black;
+    font-weight: bold;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Label checkbox */
+label {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: #444;
+    margin: 8px 0;
+    cursor: pointer;
+}
+
+/* Checkbox đẹp hơn */
+input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: #5e35b1;
+    transform: scale(1.2);
+    transition: 0.2s;
+}
+
+input[type="checkbox"]:hover {
+    transform: scale(1.3);
+}
+
+/* Nút "Áp dụng" */
+.btn-control{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn_Filter, .btn_Cancle{
+    width: 30%;
+    padding: 10px;
+
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: 0.3s ease-in-out;
+}
+
+.btn_Filter {
+    margin-left: 15px;
+    background-color: rgb(40,138,214);
+}
+
+.btn_Cancle{
+    background-color: white;
+    color: rgb(237,137,135);
+    border: 1px solid rgb(237,137,135);
+}
+
+.btn_Filter:hover, .btn_Cancle:hover{
+    transform: scale(1.03);
+}
+/* Ô nhập giá cùng hàng */
+.price-range {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px; /* Khoảng cách giữa 2 ô nhập giá */
+}
+
+input[type="number"] {
+    width: 100%; /* Chia đều khoảng cách */
+    padding: 9px;
+    border: 2px solid #b39ddb;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.6);
+    color: #333;
+    outline: none;
+    transition: 0.3s;
+    text-align: center;
+    font-size: 15px;
+    flex: 1; /* Đảm bảo hai ô nhập giá có cùng kích thước */
+}
+
+input[type="number"]:focus {
+    border-color: #5e35b1;
+    box-shadow: 0 0 8px rgba(94, 53, 177, 0.5);
+}
+
+.border {
+    border: 1px solid rgb(153,153,153);
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(94, 53, 177, 0.2); /* Soft shadow for depth */
+    transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+/* Table styles */
+.price-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+/* Cell styling for spacing */
+.price-table td {
+    padding: 10px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Anchor styles (for the links to look like buttons) */
+.price-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 0;
+    /* background-color: #5e35b1; */
+    color: black;
+    text-decoration: none;
+    border: 2px solid rgb(153,153,153); /* No border initially */
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, border 0.3s ease;
+}
+
+/* Button hover effect */
+.price-btn:hover {
+    border: 2px solid #00bcd4; /* Light blue border on hover */
+    transform: scale(1.05);
+    color: #00bcd4;
+}
+
+/* Centering the table in its container */
+.price-table {
+    margin: 0 auto;
+    max-width: 600px;  /* Adjust based on your layout */
+}
+
+/* Button styles for spacing between columns */
+.price-table td:first-child {
+    padding-right: 10px;
+}
+.price-btn.active {
+    border: 2px solid #2196F3; /* Blue border when selected */
+}
+
+/* Make sure the buttons look great on mobile as well */
+@media (max-width: 768px) {
+    .price-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+    .price-table {
+        width: 90%;
+    }
+}
+
+
+/* Container for the entire slider */
+.price-slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+/* The buttons at both ends of the slider */
+.price-min, .price-max {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background: #5e35b1;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* Button hover effect */
+.price-min:hover, .price-max:hover {
+    background: #4527a0;
+}
+
+/* The scroll container */
+.scroll {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+/* Range inside the scroll container */
+.range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #5e35b1;
+    border-radius: 5px;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .price-slider-container {
+        width: 90%;
+    }
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Container for the entire slider */
+.price-slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    position: relative; /* Contain absolutely positioned elements */
+}
+
+/* The buttons at both ends of the slider */
+.price-min, .price-max {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Position the min button at the left */
+.price-min {
+    left: 0;
+}
+
+/* Position the max button at the right */
+.price-max {
+    right: 0;
+}
+
+/* Button hover effect */
+.price-min:hover, .price-max:hover {
+    background: #00bcd4;
+}
+
+/* The scroll container */
+.scroll {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    background: rgb(214,215,217);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+/* Range inside the scroll container */
+.range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: rgb(74,144,226);
+    border-radius: 5px;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .price-slider-container {
+        width: 90%;
+    }
+}
+
+/* Button container */
+#choice {
+    font-weight: bold;
+    display: flex;
+    align-items: left;
+    justify-content: center;
+    color: #00bcd4;
+    font-size: 16px;
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* Hover effect */
+#choice:hover {
+    transform: scale(1.05);
+}
+
+/* Icon styles */
+#choice i {
+    margin-right: 10px;
+}
+
+/* Caret icon transition */
+#choice i.fa-caret-down {
+    transition: transform 0.3s ease;
+}
+
+
+
+#choice i:last-child {
+    margin-left: 10px;
+}
+
+.price-from-to {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; 
+    margin-bottom: 10px;
+}
+
+.price-from-to input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #00bcd4;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s ease-in-out;
+}
+
+.price-from-to input:focus {
+    border-color: #00bcd4;
+    box-shadow: 0 0 5px rgba(94, 53, 177, 0.5);
+}
+
+.price-from-to span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #5e35b1;
+}

@@ -1,0 +1,90 @@
+.brand_hot {
+    width: 90%;
+    margin: 0 auto;
+    background: white;
+    margin-top: 50px;
+    border-radius: 10px;
+    box-shadow: 1px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.brand_hot_header p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    padding: 15px;
+}
+
+.brand_hot_header span {
+    font-size: 14px;
+    color: #777;
+}
+
+.brand_hot_content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    position: relative;
+    padding: 30px;
+}
+
+#brandTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#brandTable td {
+    padding: 5px;
+    text-align: center;
+}
+
+#brandTable img {
+    width: 150px;
+    height: 50px;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#brandTable img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn_pre, .btn_next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.btn_pre button, .btn_next button {
+    background-color: #777;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn_pre button:hover, .btn_next button:hover {
+    background-color: #0056b3;
+    scale: 1.1;
+}
+
+.btn_pre {
+    left: -15px;
+}
+
+.btn_next {
+    right: -15px;
+}
+
+.under_line{
+    width: 80px;
+    padding-top: 15px;
+    border-bottom: 4px solid red;
+    margin: 0 auto;
+}

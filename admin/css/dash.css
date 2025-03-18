@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f9fc;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.dashboard {
+    display: flex;
+    gap: 30px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.stat-block {
+    background-color: #ffffff; /* Nền trắng */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 48%;
+    color: #007bff; /* Màu chữ xanh */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-block span:first-child {
+    display: block;
+    font-size: 18px;
+    color: #555;
+}
+
+.stat-block span:last-child {
+    display: block;
+    font-size: 28px;
+    font-weight: bold;
+    color: #007bff; /* Màu chữ xanh */
+}
+
+.tabs {
+    display: flex;
+    margin-top: 20px;
+    justify-content: space-around;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #e8f1ff;
+    color: #007bff;
+    transform: translateY(-3px);
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.filter {
+    margin-bottom: 20px;
+}
+
+.filter label {
+    font-size: 16px;
+    color: #555;
+}
+
+.filter input, .filter select {
+    padding: 12px;
+    margin-top: 5px;
+    width: 100%;
+    max-width: 250px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease;
+}
+
+.filter input:focus, .filter select:focus {
+    border-color: #007bff;
+}
+
+.chart {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart h4 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Adjusting layout for responsiveness */
+@media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .stat-block {
+        width: 100%;
+    }
+
+    .tab-button {
+        flex: 1;
+        margin: 5px 0;
+    }
+
+    .filter input, .filter select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    canvas {
+        height: 250px !important;
+    }
+}

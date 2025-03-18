@@ -1,0 +1,98 @@
+/* Container chính */
+.strengths_block_default {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    margin: 30px auto ;
+    white-space: nowrap;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+/* Mỗi item */
+.item {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 12px;
+    padding: 15px 20px;
+    width: 23%;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    cursor: pointer;
+}
+
+/* Hiệu ứng khi hover */
+.item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    background: #fef4e8;
+}
+
+/* Icon bên trái */
+.left {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fdaf17;
+    color: white;
+    font-size: 26px;
+    border-radius: 50%;
+    margin-right: 12px;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* Icon xoay nhẹ khi hover */
+.item:hover .left {
+    transform: rotate(15deg);
+    background: #ff9800;
+}
+
+/* Nội dung bên phải */
+.right {
+    flex-grow: 1;
+}
+
+/* Tiêu đề */
+.title_ctn {
+    font-weight: bold;
+    font-size: 17px;
+    color: #333;
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+/* Hover đổi màu chữ */
+.item:hover .title_ctn {
+    color: #ff9800;
+}
+
+/* Mô tả */
+p {
+    font-size: 14px;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+/* Hover đổi màu mô tả */
+.item:hover p {
+    color: #444;
+}
+
+/* Responsive: Tự động xuống dòng trên màn hình nhỏ */
+@media (max-width: 992px) {
+    .item {
+        width: 48%; /* Hai item một hàng trên tablet */
+    }
+}
+
+@media (max-width: 600px) {
+    .item {
+        width: 100%; /* Một item một hàng trên điện thoại */
+    }
+}
