@@ -235,7 +235,7 @@ class product {
         $query = "SELECT sp.*, th.tenThuongHieu 
                     FROM tbl_sanpham sp 
                     LEFT JOIN tbl_thuonghieu th ON sp.id_thuonghieu = th.id_thuonghieu 
-                    WHERE sp.maSanPham = ? AND sp.trangthai = 1";
+                    WHERE sp.maSanPham = ?";
         $stmt = $this->db->link->prepare($query);
         $stmt->bind_param("i", $id);
         $stmt->execute();

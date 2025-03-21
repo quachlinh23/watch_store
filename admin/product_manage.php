@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && isset($_
         'product_desc' => $_POST['product_desc'],
         'product_type' => $_POST['product_type'],
         'product_brand' => $_POST['product_brand'],
-        'product_price' => $_POST['product_price'] // Thêm nếu cần
+        'product_price' => $_POST['product_price']
     ];
     $update_product = $pr->update($product_id, $update_data, $_FILES);
     if (isset($update_product)) {
@@ -456,7 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                         if (id) {
                             editProduct(parseInt(id));
                         }
-                        e.preventDefault(); // Ngăn chặn hành vi mặc định của <a>
+                        e.preventDefault();
                     }
                 });
             });

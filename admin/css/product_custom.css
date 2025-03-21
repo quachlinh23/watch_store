@@ -19,6 +19,7 @@
   border-radius: 12px;
   width: 720px;
   max-width: 95%;
+  max-height: 98%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   position: relative;
   animation: slideIn 0.3s ease-out;
@@ -37,14 +38,6 @@
 .close:hover {
   color: #333;
 }
-
-/* h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 24px;
-  font-weight: 600;
-  color: #2c3e50;
-} */
 
 /* Form Layout */
 .form-container {
@@ -183,78 +176,6 @@
 .submit-btn:hover {
   background: #2980b9;
 }
-
-
-/* .btn-add {
-  padding: 10px 20px;
-  background: #2ecc71;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-add:hover {
-  background: #27ae60;
-}
-
-.table-container {
-  margin-top: 20px;
-  overflow-x: auto;
-}
-
-.table_slider {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table_slider th,
-.table_slider td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #dfe6e9;
-}
-
-.table_slider th {
-  background: #ecf0f1;
-  font-weight: 600;
-  color: #34495e;
-}
-
-.btn-container {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-action {
-  padding: 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-edit {
-  background: #f1c40f;
-  color: #fff;
-}
-
-.btn-edit:hover {
-  background: #e1b107;
-}
-
-.btn-delete {
-  background: #e74c3c;
-  color: #fff;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-delete:hover {
-  background: #c0392b;
-} */
 
 /* Animations */
 @keyframes fadeIn {

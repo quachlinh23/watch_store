@@ -23,7 +23,7 @@
             if (hasPermission($quyen, 5))
                     echo '<li onclick="showPage(\'supplier_manage.php\', this)"><i class="fa-solid fa-truck"></i> Nhà cung cấp</li>';
             if (hasPermission($quyen, 6))
-                echo '<li onclick="showPage(\'order.php\', this)"><i class="fa-solid fa-file-import"></i> Nhập hàng</li>';
+                echo '<li onclick="showPage(\'quanlynhaphang.php\', this)"><i class="fa-solid fa-file-import"></i> Nhập hàng</li>';
 
             if (hasPermission($quyen, 7))
                 echo '<li onclick="showPage(\'product_manage.php\', this)"><i class="fa-solid fa-box"></i> Sản phẩm</li>';
