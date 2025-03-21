@@ -11,7 +11,7 @@ $category = new category();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && !isset($_POST['product_id'])) {
     $insert_product = $pr->insert($_POST, $_FILES);
     if (isset($insert_product)) {
-        echo "<script>alert('$insert_product');</script>";
+        echo "<script>alert('$insert_product'); window.location.href = window.location.pathname;</script>";
     }
 }
 
@@ -22,12 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && isset($_
         'product_name' => $_POST['product_name'],
         'product_desc' => $_POST['product_desc'],
         'product_type' => $_POST['product_type'],
-        'product_brand' => $_POST['product_brand'],
-        'product_price' => $_POST['product_price']
+        'product_brand' => $_POST['product_brand']
     ];
     $update_product = $pr->update($product_id, $update_data, $_FILES);
     if (isset($update_product)) {
-        echo "<script>alert('$update_product');</script>";
+        echo "<script>alert('$update_product'); window.location.href = window.location.pathname;</script>";
     }
 }
 
@@ -49,6 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/product_custom.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .image-preview-container img { max-width: 100px; margin: 5px; }
+        .image-placeholder { width: 100px; height: 100px; background: #f0f0f0; margin: 5px; display: inline-block; }
+        .error { color: red; font-size: 12px; display: none; }
+    </style>
 </head>
 <body>
     <!-- Modal Thêm Sản Phẩm -->
@@ -68,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             <label for="main_image_add">Ảnh chính:</label>
                             <input type="file" id="main_image_add" name="main_image" accept="image/*" onchange="previewMainImage(this, 'main-image-preview-add')" />
                             <div id="main-image-preview-add" class="image-preview-container"></div>
+                            <span class="error" id="erroranh_add"></span>
                         </div>
                         <div class="form-group">
                             <label for="product_images_add">Ảnh phụ (tối đa 3):</label>
@@ -77,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                                 <div class="image-placeholder"></div>
                                 <div class="image-placeholder"></div>
                             </div>
-                            <span class="error" id="erroranh_add"></span>
+                            <span class="error" id="erroranhphu_add"></span>
                         </div>
                     </div>
                     <div class="form-column">
@@ -144,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             <label for="main_image_edit">Ảnh chính:</label>
                             <input type="file" id="main_image_edit" name="main_image" accept="image/*" onchange="previewMainImage(this, 'main-image-preview-edit')" />
                             <div id="main-image-preview-edit" class="image-preview-container"></div>
+                            <span class="error" id="erroranh_edit"></span>
                         </div>
                         <div class="form-group">
                             <label for="product_images_edit">Ảnh phụ (tối đa 3):</label>
@@ -153,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                                 <div class="image-placeholder"></div>
                                 <div class="image-placeholder"></div>
                             </div>
-                            <span class="error" id="erroranh_edit"></span>
+                            <span class="error" id="erroranhphu_edit"></span>
                         </div>
                     </div>
                     <div class="form-column">
@@ -191,11 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                                 ?>
                             </select>
                             <span class="error" id="errorthuonghieu_edit"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="product_price_edit">Giá bán:</label>
-                            <input type="number" id="product_price_edit" name="product_price" placeholder="Nhập giá bán..." />
-                            <span class="error" id="errorgiaban_edit"></span>
                         </div>
                     </div>
                 </div>
@@ -239,13 +240,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             echo "<td><img src='{$result['hinhAnh']}' alt='' class='product_image' style='max-width: 100px;'></td>";
                             echo "<td>" . ($result['trangthai'] == 1 ? "Còn kinh doanh" : "Ngừng kinh doanh") . "</td>";
                             echo '<td class="btn-container">
-                                    <a href="javascript:void(0)" title="Sửa" class="btn-action btn-edit" data-id="' . $result['maSanPham'] . '">
+                                    <a href="javascript:void(0)" title="Sửa" class="btn-action btn-edit" 
+                                       data-id="' . $result['maSanPham'] . '"
+                                       data-name="' . htmlspecialchars($result['tenSanPham']) . '"
+                                       data-desc="' . htmlspecialchars($result['mota']) . '"
+                                       data-type="' . $result['id_loai'] . '"
+                                       data-brand="' . $result['id_thuonghieu'] . '"
+                                       data-main-image="' . $result['hinhAnh'] . '">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <form action="" method="POST">
+                                    <form action="" method="POST" class="status-form">
                                         <input type="hidden" name="id" value="' . $result['maSanPham'] . '">
                                         <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
-                                        <button type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
+                                        <button style="background-color:green" type="submit" class="btn-action btn-status" title="Đổi trạng thái">
                                             <i class="fa-solid fa-rotate"></i>
                                         </button>
                                     </form>
@@ -265,16 +272,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
     <script>
         let selectedFilesAdd = [];
         let selectedFilesEdit = [];
-        let products = <?php
-            $products = [];
-            $prList = $pr->show();
-            if ($prList && $prList->num_rows > 0) {
-                while ($result = $prList->fetch_assoc()) {
-                    $products[] = $result;
-                }
-            }
-            echo json_encode($products);
-        ?>;
 
         function previewMainImage(input, previewId) {
             const previewContainer = document.getElementById(previewId);
@@ -322,13 +319,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                     }
                 });
 
-                if (files.length < 3) {
-                    for (let i = files.length; i < 3; i++) {
-                        if (!placeholders[i].parentNode) {
-                            const placeholder = document.createElement('div');
-                            placeholder.className = 'image-placeholder';
-                            previewContainer.appendChild(placeholder);
-                        }
+                for (let i = files.length; i < 3; i++) {
+                    if (!placeholders[i].parentNode) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'image-placeholder';
+                        previewContainer.appendChild(placeholder);
                     }
                 }
             }
@@ -338,27 +333,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             const form = document.getElementById(formId);
             let isValid = true;
             const suffix = formId === 'addForm' ? '_add' : '_edit';
+            const isEditForm = formId === 'editForm';
 
             const fields = [
-                { id: `product_name${suffix}`, errorId: `errorten${suffix}`, message: 'Vui lòng nhập tên sản phẩm' },
-                { id: `main_image${suffix}`, errorId: `erroranh${suffix}`, message: 'Vui lòng chọn ít nhất một ảnh chính', checkFiles: true },
-                { id: `desc${suffix}`, errorId: `errormota${suffix}`, message: 'Vui lòng nhập mô tả' },
-                { id: `product_type${suffix}`, errorId: `errorloaisanpham${suffix}`, message: 'Vui lòng chọn loại sản phẩm', checkValue: '0' },
-                { id: `product_brand${suffix}`, errorId: `errorthuonghieu${suffix}`, message: 'Vui lòng chọn thương hiệu', checkValue: '0' }
+                { id: `product_name${suffix}`, errorId: `errorten${suffix}`, message: 'Vui lòng nhập tên sản phẩm', required: true },
+                { id: `main_image${suffix}`, errorId: `erroranh${suffix}`, message: 'Vui lòng chọn ảnh chính', checkFiles: true, required: !isEditForm },
+                { id: `desc${suffix}`, errorId: `errormota${suffix}`, message: 'Vui lòng nhập mô tả', required: true },
+                { id: `product_type${suffix}`, errorId: `errorloaisanpham${suffix}`, message: 'Vui lòng chọn loại sản phẩm', checkValue: '0', required: true },
+                { id: `product_brand${suffix}`, errorId: `errorthuonghieu${suffix}`, message: 'Vui lòng chọn thương hiệu', checkValue: '0', required: true }
             ];
-
-            if (formId === 'editForm') {
-                fields.push({
-                    id: `product_price${suffix}`, errorId: `errorgiaban${suffix}`, message: 'Vui lòng nhập giá bán'
-                });
-            }
 
             fields.forEach(field => {
                 const input = document.getElementById(field.id);
                 const error = document.getElementById(field.errorId);
                 const value = field.checkFiles ? input.files.length : input.value.trim();
 
-                if ((field.checkFiles && value === 0) || (!field.checkFiles && (value === '' || (field.checkValue && value === field.checkValue)))) {
+                let hasError = false;
+
+                if (field.required) {
+                    if (field.checkFiles) {
+                        const preview = document.getElementById(field.id.replace('main_image', 'main-image-preview'));
+                        if (value === 0 && (!preview || !preview.innerHTML)) {
+                            hasError = true;
+                        }
+                    } else if (value === '' || (field.checkValue && value === field.checkValue)) {
+                        hasError = true;
+                    }
+                }
+
+                if (hasError) {
                     error.textContent = field.message;
                     error.style.display = 'block';
                     isValid = false;
@@ -388,17 +391,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
         }
 
         function editProduct(id) {
-            const data = products.find(p => p.maSanPham == id);
-            if (!data) {
+            const button = document.querySelector(`.btn-edit[data-id="${id}"]`);
+            if (!button) {
                 alert('Không tìm thấy sản phẩm với ID: ' + id);
                 return;
             }
-            document.getElementById('product_id_edit').value = id;
+
+            const data = {
+                maSanPham: id,
+                tenSanPham: button.getAttribute('data-name'),
+                moTa: button.getAttribute('data-desc'),
+                id_loai: button.getAttribute('data-type'),
+                id_thuonghieu: button.getAttribute('data-brand'),
+                hinhAnh: button.getAttribute('data-main-image')
+            };
+
+            document.getElementById('product_id_edit').value = data.maSanPham;
             document.getElementById('product_name_edit').value = data.tenSanPham || '';
             document.getElementById('desc_edit').value = data.moTa || '';
             document.getElementById('product_type_edit').value = data.id_loai || '0';
             document.getElementById('product_brand_edit').value = data.id_thuonghieu || '0';
-            document.getElementById('product_price_edit').value = data.giaban || '';
             document.getElementById('main-image-preview-edit').innerHTML = data.hinhAnh ? `<img src="${data.hinhAnh}" class="image-preview">` : '';
             const previewEdit = document.getElementById('image-preview-edit');
             previewEdit.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
@@ -419,6 +431,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
 
                 if (modals[modalId].openBtn) {
                     document.getElementById(modals[modalId].openBtn).addEventListener('click', () => {
+                        resetForm(modalId, modals[modalId].formId);
                         modal.style.display = 'flex';
                     });
                 }
@@ -447,17 +460,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                 });
             });
 
-            // Thêm sự kiện cho nút "Sửa"
             document.querySelectorAll('.btn-edit').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const link = e.target.closest('a');
-                    if (link && link.classList.contains('btn-edit')) {
-                        const id = link.getAttribute('data-id');
-                        if (id) {
-                            editProduct(parseInt(id));
-                        }
-                        e.preventDefault();
+                    const id = button.getAttribute('data-id');
+                    if (id) {
+                        editProduct(parseInt(id));
                     }
+                    e.preventDefault();
                 });
             });
         });

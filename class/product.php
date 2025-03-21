@@ -12,20 +12,6 @@ class product {
     }
 
     public function insert($data, $files) {
-        // Kiểm tra dữ liệu đầu vào từ form
-        if (empty($data['product_name'])) {
-            return "Vui lòng nhập tên sản phẩm!";
-        }
-        if (empty($data['product_desc'])) {
-            return "Vui lòng điền mô tả cho sản phẩm!";
-        }
-        if (empty($data['product_type']) || $data['product_type'] == 0) {
-            return "Vui lòng chọn loại sản phẩm!";
-        }
-        if (empty($data['product_brand']) || $data['product_brand'] == 0) {
-            return "Vui lòng chọn thương hiệu cho sản phẩm!";
-        }
-    
         $product_name = mysqli_real_escape_string($this->db->link, $data['product_name']);
         $product_desc = mysqli_real_escape_string($this->db->link, $data['product_desc']);
         $product_type = intval($data['product_type']);
@@ -62,13 +48,11 @@ class product {
             if (!move_uploaded_file($file_temp, $main_image)) {
                 return "Lỗi khi tải ảnh chính lên server! Kiểm tra quyền thư mục hoặc dung lượng server.";
             }
-        } else {
-            return "Vui lòng chọn ảnh chính!";
         }
     
         // Thêm sản phẩm vào tbl_sanpham
-        $query = "INSERT INTO tbl_sanpham (tenSanPham, id_loai, id_thuonghieu, mota, hinhAnh, trangthai) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO tbl_sanpham (tenSanPham, id_loai, id_thuonghieu, mota, hinhAnh) 
+                    VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->db->link->prepare($query);
         if (!$stmt) {
             if (file_exists($main_image)) {
@@ -76,8 +60,7 @@ class product {
             }
             return "Lỗi truy vấn: " . $this->db->link->error;
         }
-        $trangthai = 1;
-        $stmt->bind_param("siissi", $product_name, $product_type, $product_brand, $product_desc, $main_image, $trangthai);
+        $stmt->bind_param("siiss", $product_name, $product_type, $product_brand, $product_desc, $main_image);
         $result = $stmt->execute();
         if ($result) {
             $product_id = $this->db->link->insert_id;
@@ -162,8 +145,6 @@ class product {
                     }
                 }
             }
-    
-            return "Thêm sản phẩm thành công!";
         } else {
             if (file_exists($main_image)) {
                 unlink($main_image);

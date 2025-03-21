@@ -107,7 +107,7 @@ Session::init();
                     ?>
                     </div>
                 </li>
-                <li><a href="#">Thương hiệu</a></li>
+                <li><a href="#">Tin tức</a></li>
                 <li><a href="#">Thương hiệu</a></li>
                 <li><a href="contact.php">Hỗ trợ</a></li>
             </ul>

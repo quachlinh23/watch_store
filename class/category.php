@@ -13,96 +13,84 @@
 
         public function insertcategory($catname){
             $catname = $this->fm->validation($catname);
-
-            $catname = mysqli_real_escape_string($this->db->link,$catname);
+            $catname = mysqli_real_escape_string($this->db->link, $catname);
 
             if (empty($catname)){
-                $alert = "<span class='error'>Vui lòng nhập tên loại sản phẩm</span>";
-                return $alert;
-            } else{
-                $query = "INSERT INTO tbl_loaisp(tenLoai,trangthai) VALUES('$catname',1)";
-                $result = $this->db->insert($query);
-
-                if ($result){
-                    $alert = "<span class='success'>Thêm loại sản phẩm thành công</span>";
-                    return $alert;
-                }else{
-                    $alert = "<span class='error'>Thêm loại sản phẩm thất bại</span>";
-                    return $alert;
-                }
+                return false; // Trả về false nếu lỗi
             }
+
+            $check = $this->checkDuplicateName($catname);
+            if ($check && $check->num_rows > 0) {
+                return 'duplicate'; // Trả về mã lỗi đặc biệt cho trùng tên
+            }
+
+            $query = "INSERT INTO tbl_loaisp(tenLoai, trangthai) VALUES('$catname', 1)";
+            return $this->db->insert($query); // Trả về true nếu thành công, false nếu thất bại
         }
 
-
         public function show(){
-            $querry = "SELECT * FROM tbl_loaisp"; 
-            $result = $this->db->select($querry);
-            return $result;
+            $query = "SELECT * FROM tbl_loaisp"; 
+            return $this->db->select($query);
         }
 
         public function get_all_type(){
-            $querry = "SELECT * FROM tbl_loaisp where id_loai > 0"; 
-            $result = $this->db->select($querry);
-            return $result;
+            $query = "SELECT * FROM tbl_loaisp WHERE id_loai > 0"; 
+            return $this->db->select($query);
         }
 
         public function getcatbyid($id){
             $id = intval($id);
-            $querry = "SELECT * FROM tbl_loaisanpham WHERE id_loai = $id ";
-            $result = $this->db->select($querry);
-            return $result;
+            $query = "SELECT * FROM tbl_loaisp WHERE id_loai = $id";
+            return $this->db->select($query);
         }
 
-        public function update($id,$name){
+        public function update($id, $name){
+            $name = $this->fm->validation($name);
+            $name = mysqli_real_escape_string($this->db->link, $name);
+            $id = intval($id);
 
             if (empty($name)){
-                $alert = "<span class='error'>Vui lòng nhập tên loại sản phẩm</span>";
-                return $alert;
-            } else{
-                $query = "UPDATE tbl_loaisanpham SET tenLoai = '$name' WHERE id_loai = $id";
-                $result = $this->db->update($query);
-
-                if ($result){
-                    $alert = "<span class='success'>Sửa loại sản phẩm thành công</span>";
-                    return $alert;
-                }else{
-                    $alert = "<span class='error'>Sửa loại sản phẩm thất bại</span>";
-                    return $alert;
-                }
+                return false;
             }
+
+            $check = $this->checkDuplicateName($name, $id);
+            if ($check && $check->num_rows > 0) {
+                return 'duplicate';
+            }
+
+            $query = "UPDATE tbl_loaisp SET tenLoai = '$name' WHERE id_loai = $id";
+            return $this->db->update($query);
         }
 
         public function delete($id, $status) {
+            $id = intval($id);
             $newStatus = ($status == 1) ? 0 : 1;
-            $query = "UPDATE tbl_loaisanpham SET trangthai = '$newStatus' WHERE id_loai = $id";
-            
-            $result = $this->db->update($query);
-            
-            if ($result) {
-                $alert = "<span class='success'>Thay đổi trạng thái thành công</span>";
-                return $alert;
-            } else {
-                $alert = "<span class='error'>Thay đổi trạng thái thất bại</span>";
-                return $alert;
-            }
+            $query = "UPDATE tbl_loaisp SET trangthai = '$newStatus' WHERE id_loai = $id";
+            return $this->db->update($query);
         }
 
         public function search($data) {
-            $query = "SELECT * FROM tbl_loaisp WHERE tenLoai LIKE '%" . $data . "%'";
-            $result = $this->db->select($query);
-            return $result;
+            $data = $this->fm->validation($data);
+            $data = mysqli_real_escape_string($this->db->link, $data);
+            $query = "SELECT * FROM tbl_loaisp WHERE tenLoai LIKE '%$data%'";
+            return $this->db->select($query);
         }
 
         public function updateStatus($id, $status) {
             $id = intval($id);
-            $newStatus = ($status == 1) ? 0 : 1; // Đảo trạng thái
-        
+            $newStatus = ($status == 1) ? 0 : 1;
             $query = "UPDATE tbl_loaisp SET trangthai = $newStatus WHERE id_loai = $id";
-        
-            $result = $this->db->update($query); // Gọi phương thức update
-        
-            return ($result) ? true : false; // Trả về kết quả cập nhật
+            return $this->db->update($query);
         }
-        
+
+        public function checkDuplicateName($name, $id = null) {
+            $name = mysqli_real_escape_string($this->db->link, $name);
+            $query = "SELECT * FROM tbl_loaisp WHERE tenLoai = '$name'";
+            if ($id) {
+                $id = intval($id);
+                $query .= " AND id_loai != $id";
+            }
+            return $this->db->select($query);
+        }
     }
 ?>

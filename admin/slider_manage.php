@@ -21,23 +21,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Slider</title>
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="js/slider.js"></script>
+    <style>
+        .preview-container { margin-top: 10px; display: flex;}
+        .preview-image { max-width: 150px; display: none;}
+        .preview-title { font-weight: bold; margin-bottom: 5px; }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2>Quản lý slider</h2>
         <div class="search-container">
-            <!-- Nút Thêm -->
             <button class="btn-add" id="openModal">
                 <i class="fa-solid fa-plus"></i> Thêm
             </button>
-
-            <!-- Form tìm kiếm -->
             <form method="POST" class="search-input">
                 <input type="text" name="searchdata" id="searchdata" placeholder="Tìm kiếm theo tên..." value="<?php echo htmlspecialchars($search); ?>">
                 <button type="submit" name="Search"><i class="fa fa-search"></i> Tìm kiếm</button>
@@ -68,6 +71,14 @@
                         </tr>
                         <tr>
                             <td colspan="2">
+                                <div class="preview-container">
+                                    <div class="preview-title">Xem trước ảnh:</div>
+                                    <img id="image_preview_add" class="preview-image" alt="Ảnh tạm">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
                                 <span style="display: none; color: red; font-weight: bold; padding:10px 0;" id="erroranh">
                                     Vui lòng chọn hình ảnh
                                 </span>
@@ -83,7 +94,7 @@
         </div>
 
         <!-- Sửa Slider -->
-        <div id="modalupdate" class="modal" style="display: none;" enctype="multipart/form-data">
+        <div id="modalupdate" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close">×</span>
                 <h2>Sửa Slider</h2>
@@ -111,6 +122,14 @@
                         </tr>
                         <tr>
                             <td colspan="2">
+                                <div class="preview-container">
+                                    <div class="preview-title">Xem trước ảnh mới:</div>
+                                    <img id="image_preview_update" class="preview-image" alt="Ảnh tạm">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
                                 <span style="display: none; color: red; font-weight: bold; padding:10px 0;" id="erroranh_update">
                                     Vui lòng chọn hình ảnh
                                 </span>
@@ -125,7 +144,6 @@
             </div>
         </div>
 
-        <!-- Bọc bảng trong div có thanh cuộn -->
         <div class="table-container">
             <table class="table_slider">
                 <thead>
@@ -138,27 +156,29 @@
                 </thead>
                 <tbody>
                     <?php
-                        // Nếu có dữ liệu tìm kiếm
                         if (!empty($search)) {
-                            $sdlist = $sl->search($search); // Gọi phương thức search
+                            $sdlist = $sl->search($search);
                         } else {
-                            $sdlist = $sl->show(); // Gọi phương thức show
+                            $sdlist = $sl->show();
                         }
 
                         $i = 0;
-                        if ($sdlist !== false && $sdlist->num_rows > 0) { // Kiểm tra $sdlist không phải false
+                        if ($sdlist !== false && $sdlist->num_rows > 0) {
                             while ($result = $sdlist->fetch_assoc()) {
                                 $i++;
                     ?>
                     <tr>
                         <td><?php echo $i?></td>
                         <td><?php echo $result['tenSlider']?></td>
-                        <td><img src="<?php echo $result['hinhAnh'];?>" alt=""></td>
+                        <td><img src="<?php echo $result['hinhAnh'];?>" alt="" width="100"></td>
                         <td class="btn-container">
-                            <a href="" class="btn-action btn-edit" data-id="<?php echo $result['id_slider']?>" title="Chỉnh sửa">
+                            <a href="#" class="btn-action btn-edit" data-id="<?php echo $result['id_slider']?>" 
+                               data-name="<?php echo htmlspecialchars($result['tenSlider']); ?>"
+                               data-image="<?php echo $result['hinhAnh']; ?>" title="Chỉnh sửa">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
-                            <a title="Xóa" href="slider_manage.php?delid=<?php echo $result['id_slider']?>" class="btn-action btn-delete" onclick="return confirm('Bạn có muốn xóa slider này không?');">
+                            <a title="Xóa" href="slider_manage.php?delid=<?php echo $result['id_slider']?>" 
+                               class="btn-action btn-delete" onclick="return confirm('Bạn có muốn xóa slider này không?');">
                                 <i class="fa-solid fa-trash"></i>
                             </a>
                         </td>
@@ -166,7 +186,6 @@
                     <?php
                             }
                         } else {
-                            // Hiển thị thông báo khi không có kết quả hoặc truy vấn lỗi
                             echo '<tr><td colspan="4" style="text-align: center; padding: 20px;">';
                             if ($sdlist === false) {
                                 echo "Không tìm thấy slider nào phù hợp với từ khóa '" . htmlspecialchars($search) . "'";
@@ -178,5 +197,96 @@
             </table>
         </div>
     </div>
+
+    <script>
+        // Xử lý modal Thêm
+        const addModal = document.getElementById('modal');
+        const openAddModal = document.getElementById('openModal');
+        const closeAdd = document.querySelector('#modal .close');
+        const cancelAdd = document.querySelector('#modal .cancel');
+
+        openAddModal.addEventListener('click', function() {
+            addModal.style.display = 'block';
+            document.getElementById('image_preview_add').style.display = 'none';
+        });
+
+        closeAdd.addEventListener('click', function() {
+            addModal.style.display = 'none';
+        });
+
+        cancelAdd.addEventListener('click', function() {
+            addModal.style.display = 'none';
+        });
+
+        // Xử lý modal Sửa
+        const editModal = document.getElementById('modalupdate');
+        const editButtons = document.querySelectorAll('.btn-edit');
+        const closeEdit = document.querySelector('#modalupdate .close');
+        const cancelEdit = document.querySelector('#modalupdate .cancel');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const image = this.getAttribute('data-image');
+                
+                document.getElementById('slider_id').value = id;
+                document.getElementById('slide_name_update').value = name;
+                document.getElementById('image_preview').src = image;
+                document.getElementById('image_preview_update').style.display = 'none';
+                editModal.style.display = 'block';
+            });
+        });
+
+        closeEdit.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+
+        cancelEdit.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == addModal) {
+                addModal.style.display = 'none';
+            }
+            if (event.target == editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+
+        // Preview ảnh khi chọn file (Thêm)
+        document.getElementById('image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('image_preview_add');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Preview ảnh khi chọn file (Sửa)
+        document.getElementById('image_update').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('image_preview_update');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
