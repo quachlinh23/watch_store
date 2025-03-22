@@ -62,8 +62,7 @@
             }
         
             // Thêm tài khoản vào bảng tbl_taikhoan
-            $query = "INSERT INTO tbl_taikhoan (username, password) 
-                      VALUES ('$username', '$password')";
+            $query = "INSERT INTO tbl_taikhoan (username, password) VALUES ('$username', '$password')";
             $result = mysqli_query($this->db->link, $query);
         
             if (!$result) {
@@ -75,7 +74,7 @@
         
             // Thêm vào bảng tbl_khachhang
             $query_tblkhachhang = "INSERT INTO tbl_khachhang (id_taikhoan, tenKhachHang, diaChi, soDT, email) 
-                                   VALUES ('$account_id', '$hoten', '', '', '')";
+            VALUES ('$account_id', '$hoten', '', '', '')";
             $result_tblkhachhang = mysqli_query($this->db->link, $query_tblkhachhang);
         
             if (!$result_tblkhachhang) {

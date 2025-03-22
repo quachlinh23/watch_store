@@ -13,7 +13,7 @@ class nhaphang {
 
     public function add($mapn, $nguoinhap, $tongtien, $mancc, $ngaylap, $chitiet_sanpham) {
         $query = "INSERT INTO tbl_phieunhap (maPhieuNhap, maTaiKhoan, maNCC, ngayLap, tongTien) 
-                  VALUES ('$mapn', '$nguoinhap', '$mancc', '$ngaylap', '$tongtien')";
+                VALUES ('$mapn', '$nguoinhap', '$mancc', '$ngaylap', '$tongtien')";
     
         $result = $this->db->insert($query);
     
@@ -31,13 +31,13 @@ class nhaphang {
                     $mactsp = $row['maCTSP'];
     
                     $query_ct = "INSERT INTO tbl_chitietphieunhap (maPhieuNhap, maCTSP, giaNhap, soLuong) 
-                                 VALUES ('$mapn', '$mactsp', '$gianhap', '$soluong')";
+                                VALUES ('$mapn', '$mactsp', '$gianhap', '$soluong')";
     
                     $this->db->insert($query_ct);
     
                     $query_update = "UPDATE tbl_chitietsanpham 
-                                     SET soLuongTon = soLuongTon + $soluong 
-                                     WHERE maCTSP = '$mactsp'";
+                                    SET soLuongTon = soLuongTon + $soluong 
+                                    WHERE maCTSP = '$mactsp'";
     
                     $this->db->update($query_update);
                 }
@@ -66,17 +66,21 @@ class nhaphang {
     }
 
     public function getProduct(){
-        $query = "SELECT * FROM tbl_sanpham WHERE trangthai = 1";
+        $query = "SELECT sp.*
+                FROM tbl_chitietsanpham ctsp
+                INNER JOIN tbl_sanpham sp ON ctsp.masanpham = sp.maSanPham
+                WHERE sp.trangthai = 1 AND ctsp.soluongTon = 0";
+
         $result = $this->db->select($query);
         return $result;
     }
 
     public function getAllImports() {
         $query = "SELECT pn.maPhieuNhap, ncc.tenNCC, pn.ngayLap, nv.tenNhanVien, pn.tongTien
-                  FROM tbl_phieunhap pn 
-                  JOIN tbl_nhacungcap ncc ON pn.maNCC = ncc.id_nhacungcap
-                  JOIN tbl_taikhoannhanvien tknv ON pn.maTaiKhoan = tknv.id
-                  JOIN tbl_nhanvien nv ON tknv.id = nv.id_taikhoan";
+                FROM tbl_phieunhap pn 
+                JOIN tbl_nhacungcap ncc ON pn.maNCC = ncc.id_nhacungcap
+                JOIN tbl_taikhoannhanvien tknv ON pn.maTaiKhoan = tknv.id
+                JOIN tbl_nhanvien nv ON tknv.id = nv.id_taikhoan";
         $result = $this->db->select($query);
         return $result;
     }
@@ -100,20 +104,74 @@ class nhaphang {
             $giaNhap = mysqli_escape_string($this->db->link, $item['gianhap']);
     
             $queryCTSP = "INSERT INTO tbl_chitietsanpham (masanpham, soluongTon, giaban) 
-                          VALUES ('$maSP', '$soLuong', '$giaBan')";
+                        VALUES ('$maSP', '$soLuong', '$giaBan')";
             $resultCTSP = $this->db->insert($queryCTSP);
             if (!$resultCTSP) {
                 return "Lỗi khi thêm chi tiết sản phẩm $maSP!";
             }
             $mactSP = $this->db->link->insert_id;
             $queryCTPN = "INSERT INTO tbl_chitietphieunhap (maPN, mactSP, giaNhap, soluongNhap) 
-                          VALUES ('$maPN', '$mactSP', '$giaNhap', '$soLuong')";
+                        VALUES ('$maPN', '$mactSP', '$giaNhap', '$soLuong')";
             $resultCTPN = $this->db->insert($queryCTPN);
             if (!$resultCTPN) {
                 return "Lỗi khi thêm chi tiết phiếu nhập!";
             }
         }
         return "Thêm phiếu nhập thành công!";
+    }
+
+    // Trong nhaphang.php
+    public function getImportDetails($importId) {
+        // Thoát chuỗi để tránh SQL Injection
+        $importId = mysqli_escape_string($this->db->link, $importId);
+        
+        // Truy vấn để lấy chi tiết hóa đơn nhập
+        $sql = "SELECT 
+                    ctp.maPN,
+                    ctsp.masanpham,
+                    sp.tenSanPham,
+                    ctp.soLuongNhap,
+                    ctp.giaNhap,
+                    ctsp.giaban
+                FROM tbl_chitietphieunhap ctp
+                JOIN tbl_chitietsanpham ctsp ON ctp.mactSP = ctsp.mact
+                JOIN tbl_sanpham sp ON ctsp.masanpham = sp.maSanPham
+                WHERE ctp.maPN = '$importId'";
+        
+        $result = $this->db->select($sql);
+        
+        if (!$result) {
+            return false; // Trả về false nếu truy vấn thất bại
+        }
+        
+        $details = [];
+        while ($row = $result->fetch_assoc()) {
+            $details[] = [
+                'productCode' => $row['masanpham'],
+                'productName' => $row['tenSanPham'],
+                'quantity' => $row['soLuongNhap'],
+                'importPrice' => $row['giaNhap'],
+                'sellPrice' => $row['giaban']
+            ];
+        }
+        
+        return $details;
+    }
+
+    public function searchInvoice($date_start, $date_end) {
+        $date_start = mysqli_escape_string($this->db->link, $date_start);
+        $date_end = mysqli_escape_string($this->db->link, $date_end);
+        
+        $query = "SELECT pn.maPhieuNhap, pn.ngayLap, pn.tongTien, pn.maNCC, ncc.tenNCC, nv.tenNhanVien
+                FROM tbl_phieunhap pn
+                JOIN tbl_nhacungcap ncc ON pn.maNCC = ncc.id_nhacungcap
+                JOIN tbl_taikhoannhanvien tk ON pn.maTaiKhoan = tk.id
+                JOIN tbl_nhanvien nv ON tk.id = nv.id_taikhoan
+                WHERE pn.ngayLap BETWEEN '$date_start' AND '$date_end'
+                ORDER BY pn.ngayLap DESC";
+        
+        $result = $this->db->select($query); // Giả sử $this->db->select trả về mysqli_result
+        return $result;
     }
 }
 ?>
