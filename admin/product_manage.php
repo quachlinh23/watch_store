@@ -241,12 +241,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             echo "<td>" . ($result['trangthai'] == 1 ? "Còn kinh doanh" : "Ngừng kinh doanh") . "</td>";
                             echo '<td class="btn-container">
                                     <a href="javascript:void(0)" title="Sửa" class="btn-action btn-edit" 
-                                       data-id="' . $result['maSanPham'] . '"
-                                       data-name="' . htmlspecialchars($result['tenSanPham']) . '"
-                                       data-desc="' . htmlspecialchars($result['mota']) . '"
-                                       data-type="' . $result['id_loai'] . '"
-                                       data-brand="' . $result['id_thuonghieu'] . '"
-                                       data-main-image="' . $result['hinhAnh'] . '">
+                                        data-id="' . $result['maSanPham'] . '"
+                                        data-name="' . htmlspecialchars($result['tenSanPham']) . '"
+                                        data-desc="' . htmlspecialchars($result['mota']) . '"
+                                        data-type="' . $result['id_loai'] . '"
+                                        data-brand="' . $result['id_thuonghieu'] . '"
+                                        data-main-image="' . $result['hinhAnh'] . '">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                     <form action="" method="POST" class="status-form">

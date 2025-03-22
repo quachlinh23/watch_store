@@ -78,6 +78,9 @@
     box-shadow: var(--box-shadow);
     margin-bottom: 15px;
 }
+.form-group.select-product{
+    grid-column: span 2;
+}
 
 /* Form Grid */
 .form-grid {
@@ -221,6 +224,8 @@
 .btn-add {
     background: var(--success-color);
     color: white;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .btn-cancel {
@@ -270,4 +275,10 @@
 @keyframes slideUp {
     from { transform: translateY(30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+.search-input {
+    gap: 10px;
+}
+#start_date, #end_date {
+    width: 150px;
 }

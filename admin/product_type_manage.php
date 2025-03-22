@@ -167,7 +167,7 @@
                             <form action="" method="POST" style="display: inline;">
                                 <input type="hidden" name="id" value="<?php echo $result['id_loai']; ?>">
                                 <input type="hidden" name="trangThai" value="<?php echo ($result['trangthai'] == 1) ? 1 : 0; ?>">
-                                <button type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
+                                <button style="background-color: red;" type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
                                     <i class="fa-solid fa-rotate"></i>
                                 </button>
                             </form>

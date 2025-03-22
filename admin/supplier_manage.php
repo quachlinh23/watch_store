@@ -64,7 +64,7 @@
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/search1.css">
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -215,7 +215,6 @@
     <div class="container">
         <h2>Quản lý nhà cung cấp</h2>
         
-
         <!-- Ô tìm kiếm -->
         <div class="search-container">
             <!-- Nút Thêm -->
@@ -346,8 +345,8 @@
                         <td><?php echo htmlspecialchars($result['soDT']); ?></td>
                         <td><?php echo $result['trangThai'] == 1 ? "Còn hợp tác" : "Ngừng hợp tác"; ?></td>
                         <td class="btn-container">
-                            <a href="#" class="btn-action btn-edit" data-id="<?php echo $result['id_nhacungcap']; ?>">
-                                <i class="fa-solid fa-pen"></i>
+                            <a style="background-color: green;" href="#" class="btn-action btn-edit" data-id="<?php echo $result['id_nhacungcap']; ?>">
+                                <i class="fa-solid fa-edit"></i>
                             </a>
                             <form action="" method="POST">
                                 <input type="hidden" name="id" value="<?php echo $result['id_nhacungcap']; ?>">

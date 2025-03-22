@@ -172,13 +172,13 @@
                         <td><?php echo $result['tenSlider']?></td>
                         <td><img src="<?php echo $result['hinhAnh'];?>" alt="" width="100"></td>
                         <td class="btn-container">
-                            <a href="#" class="btn-action btn-edit" data-id="<?php echo $result['id_slider']?>" 
-                               data-name="<?php echo htmlspecialchars($result['tenSlider']); ?>"
-                               data-image="<?php echo $result['hinhAnh']; ?>" title="Chỉnh sửa">
-                                <i class="fa-solid fa-pen"></i>
+                            <a style="background-color: green;" href="" class="btn-action btn-edit" data-id="<?php echo $result['id_slider']?>" 
+                                data-name="<?php echo htmlspecialchars($result['tenSlider']); ?>"
+                                data-image="<?php echo $result['hinhAnh']; ?>" title="Chỉnh sửa">
+                                <i class="fa-solid fa-edit"></i>
                             </a>
                             <a title="Xóa" href="slider_manage.php?delid=<?php echo $result['id_slider']?>" 
-                               class="btn-action btn-delete" onclick="return confirm('Bạn có muốn xóa slider này không?');">
+                                class="btn-action btn-delete" onclick="return confirm('Bạn có muốn xóa slider này không?');">
                                 <i class="fa-solid fa-trash"></i>
                             </a>
                         </td>

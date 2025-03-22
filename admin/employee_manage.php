@@ -170,11 +170,11 @@
                             <form action="" method="POST">
                                 <input type="hidden" name="id" value="<?php echo $result['id']; ?>">
                                 <input type="hidden" name="trangThai" value="<?php echo ($result['trangthai'] == 1) ? 1 : 0; ?>">
-                                <button type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
+                                <button style="background-color: #ff0000;" type="submit" class="btn-action btn-edit" title="Đổi trạng thái">
                                     <i class="fa-solid fa-rotate"></i>
                                 </button>
                             </form>
-                                <a title="Phân quyền" href="#" class="btn-action btn-permission btn-delete" data-id="<?php echo $result['id']; ?>" data-quyen="<?php echo $result['quyen']; ?>">
+                                <a style="background-color: green;" title="Phân quyền" href="#" class="btn-action btn-permission btn-delete" data-id="<?php echo $result['id']; ?>" data-quyen="<?php echo $result['quyen']; ?>">
                                     <i class="fa-solid fa-user-gear"></i>
                                 </a>
                         </td>

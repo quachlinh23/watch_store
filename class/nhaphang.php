@@ -65,12 +65,13 @@ class nhaphang {
         return $result;
     }
 
-    public function getProduct(){
+    public function getProduct() {
         $query = "SELECT sp.*
-                FROM tbl_chitietsanpham ctsp
-                INNER JOIN tbl_sanpham sp ON ctsp.masanpham = sp.maSanPham
-                WHERE sp.trangthai = 1 AND ctsp.soluongTon = 0";
-
+                FROM tbl_sanpham sp
+                LEFT JOIN tbl_chitietsanpham ctsp ON ctsp.masanpham = sp.maSanPham
+                WHERE sp.trangthai = 1
+                AND (ctsp.masanpham IS NULL OR ctsp.soluongTon = 0)";
+    
         $result = $this->db->select($query);
         return $result;
     }

@@ -7,6 +7,9 @@
     position: relative;
 }
 
+.search-container i{
+    padding-right: 5px;
+}
 /* Form tìm kiếm */
 .search-input {
     position: absolute;
@@ -31,44 +34,47 @@
 
 /* Nút tìm kiếm */
 .search-input button {
-    padding: 8px 12px;
+    padding: 10px 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
     transition: background 0.3s ease-in-out;
     display: flex;
     align-items: center;
     margin-left: 10px;
+    font-weight: bold;
 }
 
-.search-input button:hover {
+
+
+.search-input button:hover, .btn-add:hover{
     background-color: #45a049;
 }
 
 /* Nút Thêm */
 .btn-add {
-    padding: 10px 15px;
+    padding: 10px 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
     transition: background 0.3s ease-in-out;
     display: flex;
     align-items: center;
-    gap: 5px;
-}
-
-.btn-add:hover {
-    background-color: #007bb5;
+    font-weight: bold;
 }
 
 /* Biểu tượng trong nút */
 .btn-add i,
 .search-form button i {
     font-size: 14px;
+}
+
+#searchdata{
+    border-radius: 10px;
 }

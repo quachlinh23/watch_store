@@ -23,10 +23,10 @@
             <div class="footer-column">
                 <h3><i class="fa fa-info-circle"></i> Thông tin khác</h3>
                 <ul>
-                    <li><a href="#">Chính sách bảo hành</a></li>
-                    <li><a href="#">Điều khoản sử dụng</a></li>
-                    <li><a href="#">Hướng dẫn mua hàng</a></li>
-                    <li><a href="#">Liên hệ</a></li>
+                    <li><a href="contact.php">Chính sách bảo hành</a></li>
+                    <li><a href="contact.php">Điều khoản sử dụng</a></li>
+                    <li><a href="contact.php">Hướng dẫn mua hàng</a></li>
+                    <li><a href="contact.php">Liên hệ</a></li>
                 </ul>
             </div>
             

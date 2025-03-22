@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/donhang.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
@@ -28,11 +28,11 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">STT</th>
-                    <th style="width: 30%;">Tên khách hàng</th>
+                    <th style="width: 20%;">Tên khách hàng</th>
                     <th style="width: 15%;">Số điện thoại</th>
-                    <th style="width: 10%;">Trạng thái</th>
+                    <th style="width: 15%;">Trạng thái</th>
                     <th style="width: 20%;">Tổng tiền</th>
-                    <th style="width: 20%;">Hành động</th>
+                    <th style="width: 25%;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,11 +43,11 @@
                     <td>Đã giao</td>
                     <td>1.500.000 VNĐ</td>
                     <td class="btn-container">
-                        <button class="btn-action btn-detail" onclick="showDetail('01', 'Nguyễn Văn A', '0123456789', 'Đã giao', '1.500.000 VNĐ')">
-                            <i class="fa-solid fa-eye"></i> Xem chi tiết
+                        <button style="background-color: #4caf50; color: white; font-weight: bold;" title="Xem chi tiết" class="btn-action btn-detail" onclick="showDetail('01', 'Nguyễn Văn A', '0123456789', 'Đã giao', '1.500.000 VNĐ')">
+                            <i style="padding-right: 5px;" class="fa-solid fa-eye"></i> Chi tiết
                         </button>
-                        <button class="btn-action">
-                            <i class="fa-solid fa-trash"></i> Duyệt
+                        <button style="background-color: #ff0000; color: white; font-weight: bold;" class="btn-action">
+                            <i style="padding-right: 5px;" class="fa-solid fa-check-to-slot" style="color: black;"></i> Duyệt đơn
                         </button>
                     </td>
                 </tr>
@@ -58,11 +58,11 @@
                     <td>Chưa giao</td>
                     <td>2.200.000 VNĐ</td>
                     <td class="btn-container">
-                        <button class="btn-action btn-detail" onclick="showDetail('02', 'Trần Thị B', '0987654321', 'Chưa giao', '2.200.000 VNĐ')">
-                            <i class="fa-solid fa-eye"></i> Xem chi tiết
+                        <button style="background-color: #4caf50; color: white; font-weight: bold;" title="Xem chi tiết" class="btn-action btn-detail" onclick="showDetail('01', 'Nguyễn Văn A', '0123456789', 'Đã giao', '1.500.000 VNĐ')">
+                            <i style="padding-right: 5px;" class="fa-solid fa-eye"></i> Chi tiết
                         </button>
-                        <button class="btn-action">
-                            <i class="fa-solid fa-trash"></i> Duyệt
+                        <button style="background-color: #ff0000; color: white; font-weight: bold;" class="btn-action">
+                            <i style="padding-right: 5px;" class="fa-solid fa-check-to-slot" style="color: black;"></i> Duyệt đơn
                         </button>
                     </td>
                 </tr>

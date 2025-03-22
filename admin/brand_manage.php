@@ -220,9 +220,9 @@
                         <th style="width: 3%;">STT</th>
                         <th style="width: 17%;">Tên thương hiệu</th>
                         <th style="width: 20%;">Hình ảnh</th>
-                        <th style="width: 35%;">Mô tả</th>
+                        <th style="width: 30%;">Mô tả</th>
                         <th style="width: 15%;">Trạng thái</th>
-                        <th style="width: 10%;">Hành động</th>
+                        <th style="width: 15%;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -245,8 +245,8 @@
                         <td><?php echo $result['mota']?></td>
                         <td><?php echo (intval($result['trangthai']) === 1 ? "Còn kinh doanh" : "Ngừng kinh doanh")?></td>
                         <td class="btn-container">
-                            <a href="" title="Sửa" class="btn-action btn-edit" data-id="<?php echo $result['id_thuonghieu']; ?>">
-                                <i class="fa-solid fa-pen"></i>
+                            <a href="" style="background-color: green;" title="Sửa" class="btn-action btn-edit" data-id="<?php echo $result['id_thuonghieu']; ?>">
+                                <i class="fa-solid fa-edit"></i>
                             </a>
                             <form action="" method="POST">
                                 <input type="hidden" name="id" value="<?php echo $result['id_thuonghieu']; ?>">
