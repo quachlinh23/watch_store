@@ -13,7 +13,7 @@
             <div class="footer-column">
                 <h3><i class="fa fa-store"></i> Về chúng tôi</h3>
                 <ul>
-                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="infostore.php">Giới thiệu</a></li>
                     <li><a href="#">Tuyển dụng</a></li>
                     <li><a href="contact.php">Góp ý, bảo hành</a></li>
                     <li><a href="#">Cửa hàng gần đây</a></li>
@@ -79,5 +79,4 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
 });
-
 </script>

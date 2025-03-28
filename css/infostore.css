@@ -1,0 +1,286 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Customer Photos */
+.customer-photos {
+    padding: 50px 0;
+}
+
+.photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    /* justify-content: center; */
+}
+
+.photo-gallery img {
+    max-width: 270px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.photo-gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* Milestones Section */
+.text1 {
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.set {
+    font-size: 28px;
+    color: #F4A261;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.camket {
+    font-size: 30px;
+    font-weight: bold;
+    color: #F4A261;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.text {
+    max-width: 700px;
+    margin: 0 auto 15px;
+    font-size: 16px;
+    color: #666;
+    font-weight: 300;
+}
+
+.remem {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 20px 0 10px;
+}
+
+.milestone-list {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: left;
+    list-style: none;
+}
+
+.milestone-list li {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.milestone-list li:before {
+    content: "•";
+    color: #F4A261;
+    position: absolute;
+    left: 0;
+}
+
+.milestone-list li strong {
+    color: #333;
+}
+
+/* Commitment Cards */
+.commit {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 50px 20px;
+}
+
+.card {
+    position: relative;
+    width: 250px;
+    padding: 50px 20px 20px;
+    background-color: #4d4d4d;
+    border-radius: 20px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.number-circle {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: #edcfa7;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #010101;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #edcfa7;
+}
+
+.description {
+    font-size: 16px;
+    color: #d3d3d3;
+}
+
+/* Customer Photos X Section */
+.customer-photos-x {
+    padding: 50px 0;
+}
+
+.containe-xr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.img-1, .img-2 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.img-2 {
+    margin-top: 20px;
+}
+
+.img-1 img, .img-2 img {
+    width: 500px; /* Tăng từ 200px lên 300px để ảnh to hơn */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.img-1 img:hover, .img-2 img:hover {
+    transform: scale(1.05);
+}
+
+/* Floating Buttons */
+.floating-buttons {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.floating-buttons .btn {
+    width: 50px;
+    height: 50px;
+    background-color: #ff6f61;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.floating-buttons .btn:hover {
+    transform: scale(1.1);
+}
+
+.floating-buttons .btn.zalo {
+    background-color: #00aaff;
+}
+
+.floating-buttons .btn.messenger {
+    background-color: #0084ff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .photo-gallery img {
+        width: 45%;
+    }
+
+    .text1 {
+        padding: 30px 15px;
+    }
+
+    .set {
+        font-size: 24px;
+    }
+
+    .camket {
+        font-size: 26px;
+    }
+
+    .text, .milestone-list li {
+        font-size: 14px;
+    }
+
+    .commit {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 80%;
+        max-width: 300px;
+    }
+
+    .img-1 img, .img-2 img {
+        width: 200px; /* Giảm xuống 200px trên màn hình nhỏ */
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-gallery img {
+        width: 100%;
+    }
+
+    .set {
+        font-size: 20px;
+    }
+
+    .camket {
+        font-size: 22px;
+    }
+
+    .img-1 img, .img-2 img {
+        width: 150px; /* Giảm thêm trên màn hình rất nhỏ */
+    }
+}
