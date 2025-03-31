@@ -10,9 +10,6 @@ $category = new category();
 // Xử lý thêm sản phẩm
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && !isset($_POST['product_id'])) {
     $insert_product = $pr->insert($_POST, $_FILES);
-    if (isset($insert_product)) {
-        echo "<script>alert('$insert_product'); window.location.href = window.location.pathname;</script>";
-    }
 }
 
 // Xử lý sửa sản phẩm
@@ -22,19 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && isset($_
         'product_name' => $_POST['product_name'],
         'product_desc' => $_POST['product_desc'],
         'product_type' => $_POST['product_type'],
-        'product_brand' => $_POST['product_brand']
+        'product_brand' => $_POST['product_brand'],
+        'delete_sub_images' => $_POST['delete_sub_images'] // Danh sách ảnh phụ cần xóa
     ];
     $update_product = $pr->update($product_id, $update_data, $_FILES);
-    if (isset($update_product)) {
-        echo "<script>alert('$update_product'); window.location.href = window.location.pathname;</script>";
-    }
 }
 
 // Xử lý đổi trạng thái
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangThai'])) {
     $id = intval($_POST['id']);
     $status = intval($_POST['trangThai']);
-    $update_status = $pr->updateStatus($id, $status);
+    $pr->updateStatus($id, $status);
+    echo "<script>window.location.href = window.location.pathname;</script>";
 }
 ?>
 
@@ -52,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
         .image-preview-container img { max-width: 100px; margin: 5px; }
         .image-placeholder { width: 100px; height: 100px; background: #f0f0f0; margin: 5px; display: inline-block; }
         .error { color: red; font-size: 12px; display: none; }
-        #selectImagesBtn { padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer; }
-        #selectImagesBtn:hover { background: #0056b3; }
+        #selectImagesBtn, #selectImagesBtnEdit { padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #selectImagesBtn:hover, #selectImagesBtnEdit:hover { background: #0056b3; }
     </style>
 </head>
 <body>
@@ -81,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                             <button type="button" id="selectImagesBtn" onclick="document.getElementById('product_images_add').click();">Chọn ảnh phụ</button>
                             <input type="file" id="product_images_add" accept="image/*" style="display: none;" onchange="previewImages(this, 'image-preview-add')" />
                             <div id="image-preview-add" class="image-preview-container"></div>
-                            <div id="hidden-images-add"></div> <!-- Khu vực chứa input ẩn -->
+                            <div id="hidden-images-add"></div>
                             <span class="error" id="erroranhphu_add"></span>
                         </div>
                     </div>
@@ -138,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             <h2>Sửa sản phẩm</h2>
             <form method="post" enctype="multipart/form-data" class="form" id="editForm">
                 <input type="hidden" id="product_id_edit" name="product_id">
+                <input type="hidden" id="delete_sub_images" name="delete_sub_images" value="[]">
                 <div class="form-container">
                     <div class="form-column">
                         <div class="form-group">
@@ -153,12 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                         </div>
                         <div class="form-group">
                             <label for="product_images_edit">Ảnh phụ (tối đa 3):</label>
-                            <input type="file" id="product_images_edit" name="product_images[]" accept="image/*" multiple onchange="previewImages(this, 'image-preview-edit')" />
-                            <div id="image-preview-edit" class="image-preview-container">
-                                <div class="image-placeholder"></div>
-                                <div class="image-placeholder"></div>
-                                <div class="image-placeholder"></div>
-                            </div>
+                            <button type="button" id="selectImagesBtnEdit" onclick="document.getElementById('product_images_edit').click();">Chọn ảnh phụ</button>
+                            <input type="file" id="product_images_edit" accept="image/*" style="display: none;" onchange="previewImages(this, 'image-preview-edit')" />
+                            <div id="image-preview-edit" class="image-preview-container"></div>
+                            <div id="hidden-images-edit"></div>
                             <span class="error" id="erroranhphu_edit"></span>
                         </div>
                     </div>
@@ -232,6 +227,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                         $i = 0;
                         while ($result = $prList->fetch_assoc()) {
                             $i++;
+                            $sub_images = $pr->getSubImages($result['maSanPham']);
+                            $sub_images_array = [];
+                            if ($sub_images) {
+                                while ($sub = $sub_images->fetch_assoc()) {
+                                    $sub_images_array[] = $sub['hinhAnh'];
+                                }
+                            }
                             echo "<tr class='table_row'>";
                             echo "<td>{$i}</td>";
                             echo "<td>{$result['tenSanPham']}</td>";
@@ -246,12 +248,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                                         data-desc="' . htmlspecialchars($result['mota']) . '"
                                         data-type="' . $result['id_loai'] . '"
                                         data-brand="' . $result['id_thuonghieu'] . '"
-                                        data-main-image="' . $result['hinhAnh'] . '">
+                                        data-main-image="' . $result['hinhAnh'] . '"
+                                        data-sub-images="' . htmlspecialchars(json_encode($sub_images_array)) . '">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                     <form action="" method="POST" class="status-form">
                                         <input type="hidden" name="id" value="' . $result['maSanPham'] . '">
-                                        <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
+                                        <input type="hidden" name="trangThai" value="' . $result['trangthai'] . '">
                                         <button style="background-color:green" type="submit" class="btn-action btn-status" title="Đổi trạng thái">
                                             <i class="fa-solid fa-rotate"></i>
                                         </button>
@@ -272,6 +275,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
     <script>
         let selectedFilesAdd = [];
         let selectedFilesEdit = [];
+        let deletedSubImages = [];
 
         function previewMainImage(input, previewId) {
             const previewContainer = document.getElementById(previewId);
@@ -290,14 +294,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
 
         function previewImages(input, previewId) {
             const previewContainer = document.getElementById(previewId);
-            const hiddenContainer = document.getElementById('hidden-images-add');
+            const hiddenContainer = document.getElementById(previewId.includes('add') ? 'hidden-images-add' : 'hidden-images-edit');
             const files = input.files;
             const selectedFiles = previewId.includes('add') ? selectedFilesAdd : selectedFilesEdit;
 
             if (files) {
                 const totalImages = selectedFiles.length + files.length;
                 if (totalImages > 3) {
-                    alert('Chỉ được chọn tối đa 3 ảnh phụ! Bạn đã chọn ' + selectedFiles.length + ' ảnh.');
+                    // alert('Chỉ được chọn tối đa 3 ảnh phụ! Bạn đã chọn ' + selectedFiles.length + ' ảnh.');
                     input.value = '';
                     return;
                 }
@@ -340,7 +344,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                         imgWrapper.appendChild(removeBtn);
                         previewContainer.appendChild(imgWrapper);
 
-                        // Cập nhật input ẩn
                         updateHiddenInputs(hiddenContainer, selectedFiles);
                     };
                     reader.readAsDataURL(file);
@@ -357,16 +360,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                 input.type = 'file';
                 input.name = 'product_images[]';
                 input.style.display = 'none';
-                input.files = createFileList(file); // Tạo FileList từ file
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
                 container.appendChild(input);
             });
         }
 
-        // Hàm tạo FileList từ file (không hoạt động trực tiếp, cần dùng DataTransfer)
-        function createFileList(file) {
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            return dataTransfer.files;
+        function loadExistingSubImages(subImages, previewId, hiddenId) {
+            const previewContainer = document.getElementById(previewId);
+            const hiddenContainer = document.getElementById(hiddenId);
+            const selectedFiles = previewId.includes('add') ? selectedFilesAdd : selectedFilesEdit;
+            previewContainer.innerHTML = '';
+            selectedFiles.length = 0;
+            deletedSubImages = [];
+
+            if (subImages && subImages.length > 0) {
+                subImages.forEach((imgUrl, index) => {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.style.display = 'inline-block';
+                    imgWrapper.style.position = 'relative';
+
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.className = 'image-preview';
+                    img.style.maxWidth = '100px';
+                    img.style.margin = '5px';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '×';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '0';
+                    removeBtn.style.right = '0';
+                    removeBtn.style.background = 'red';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.onclick = function() {
+                        imgWrapper.remove();
+                        deletedSubImages.push(imgUrl);
+                        document.getElementById('delete_sub_images').value = JSON.stringify(deletedSubImages);
+                        const index = selectedFiles.indexOf(imgUrl);
+                        if (index > -1) {
+                            selectedFiles.splice(index, 1);
+                        }
+                        updateHiddenInputs(hiddenContainer, selectedFiles);
+                    };
+
+                    imgWrapper.appendChild(img);
+                    imgWrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(imgWrapper);
+
+                    fetch(imgUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], `existing_image_${index}.jpg`, { type: blob.type });
+                            selectedFiles.push(file);
+                            updateHiddenInputs(hiddenContainer, selectedFiles);
+                        });
+                });
+            }
         }
 
         function validateForm(formId) {
@@ -419,14 +472,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             const previewAdd = document.getElementById('image-preview-add');
             const previewEdit = document.getElementById('image-preview-edit');
             const hiddenAdd = document.getElementById('hidden-images-add');
+            const hiddenEdit = document.getElementById('hidden-images-edit');
+            
             if (modalId === 'add-modal' && previewAdd) {
                 previewAdd.innerHTML = '';
                 hiddenAdd.innerHTML = '';
                 selectedFilesAdd = [];
             }
             if (modalId === 'edit-modal' && previewEdit) {
-                previewEdit.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
+                previewEdit.innerHTML = '';
+                hiddenEdit.innerHTML = '';
                 selectedFilesEdit = [];
+                document.getElementById('delete_sub_images').value = '[]';
+                deletedSubImages = [];
             }
             document.getElementById('main-image-preview-' + (modalId === 'add-modal' ? 'add' : 'edit')).innerHTML = '';
             document.querySelectorAll(`#${modalId} .error`).forEach(error => error.style.display = 'none');
@@ -445,7 +503,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                 moTa: button.getAttribute('data-desc'),
                 id_loai: button.getAttribute('data-type'),
                 id_thuonghieu: button.getAttribute('data-brand'),
-                hinhAnh: button.getAttribute('data-main-image')
+                hinhAnh: button.getAttribute('data-main-image'),
+                anhPhu: button.getAttribute('data-sub-images') ? JSON.parse(button.getAttribute('data-sub-images')) : []
             };
 
             document.getElementById('product_id_edit').value = data.maSanPham;
@@ -454,8 +513,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             document.getElementById('product_type_edit').value = data.id_loai || '0';
             document.getElementById('product_brand_edit').value = data.id_thuonghieu || '0';
             document.getElementById('main-image-preview-edit').innerHTML = data.hinhAnh ? `<img src="${data.hinhAnh}" class="image-preview">` : '';
-            const previewEdit = document.getElementById('image-preview-edit');
-            previewEdit.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
+            
+            loadExistingSubImages(data.anhPhu, 'image-preview-edit', 'hidden-images-edit');
+            
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -505,9 +565,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             document.querySelectorAll('.btn-edit').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const id = button.getAttribute('data-id');
-                    if (id) {
-                        editProduct(parseInt(id));
-                    }
+                    if (id) editProduct(parseInt(id));
                     e.preventDefault();
                 });
             });

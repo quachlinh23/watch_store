@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/donhang.css">
+    <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>

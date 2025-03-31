@@ -79,38 +79,38 @@
 
         public function updateEmployee($idEmployee, $fullname, $phone, $email) {
             $idEmployee = intval($idEmployee);
+            if ($idEmployee <= 0 || empty($fullname) || empty($phone) || empty($email)) {
+                return "Dữ liệu không hợp lệ!";
+            }
         
-            // Chống SQL Injection
-            $fullname = mysqli_real_escape_string($this->db->link, $fullname);
-            $phone = mysqli_real_escape_string($this->db->link, $phone);
-            $email = mysqli_real_escape_string($this->db->link, $email);
-        
-            // Kiểm tra trùng số điện thoại hoặc email (loại trừ idEmployee đang cập nhật)
-            $queryCheck = "SELECT id_nhanvien FROM tbl_nhanvien 
-                           WHERE (soDT = '$phone' OR email = '$email') 
-                           AND id_nhanvien != $idEmployee";
-            $checkResult = $this->db->select($queryCheck);
-        
-            if ($checkResult && $checkResult->num_rows > 0) {
+            // Kiểm tra trùng số điện thoại hoặc email (loại trừ nhân viên hiện tại)
+            $queryCheck = "SELECT COUNT(*) AS count FROM tbl_nhanvien WHERE (soDT = ? OR email = ?) AND id_nhanvien != ?";
+            $stmtCheck = $this->db->link->prepare($queryCheck);
+            $stmtCheck->bind_param("ssi", $phone, $email, $idEmployee);
+            $stmtCheck->execute();
+            $resultCheck = $stmtCheck->get_result();
+            $row = $resultCheck->fetch_assoc();
+            
+            if ($row['count'] > 0) {
                 return "Số điện thoại hoặc Email đã tồn tại!";
             }
         
             // Nếu không trùng, tiến hành cập nhật
-            $queryUpdate = "UPDATE tbl_nhanvien 
-                            SET tenNhanVien = '$fullname', soDT = '$phone', email = '$email' 
-                            WHERE id_nhanvien = $idEmployee";
-            $result = $this->db->update($queryUpdate);
-        
-            return ($result) ? true : false;
+            $queryUpdate = "UPDATE tbl_nhanvien SET tenNhanVien = ?, soDT = ?, email = ? WHERE id_nhanvien = ?";
+            $stmtUpdate = $this->db->link->prepare($queryUpdate);
+            $stmtUpdate->bind_param("sssi", $fullname, $phone, $email, $idEmployee);
+            $updateSuccess = $stmtUpdate->execute();
+            
+            return $updateSuccess;
         }
-
+        
         public function updatePassword($idEmployee, $newPass) {
             $idEmployee = intval($idEmployee);
             $newPass = mysqli_real_escape_string($this->db->link, $newPass);
     
-            $queryUpdate = "UPDATE tbl_nhanvien 
+            $queryUpdate = "UPDATE tbl_taikhoannhanvien
                             SET password = '$newPass' 
-                            WHERE id_nhanvien = $idEmployee";
+                            WHERE id = $idEmployee";
             $result = $this->db->update($queryUpdate);
     
             return ($result) ? true : false;
@@ -130,15 +130,15 @@
 
         public function getEmployeeById($id){
             $query = "SELECT nv.tenNhanVien, nv.soDT, nv.email, tk.username, tk.password
-                      FROM tbl_nhanvien nv
-                      JOIN tbl_taikhoannhanvien tk ON nv.id_nhanvien = tk.id
-                      WHERE nv.id_nhanvien = $id";
+                    FROM tbl_nhanvien nv
+                    JOIN tbl_taikhoannhanvien tk ON nv.id_nhanvien = tk.id
+                    WHERE nv.id_nhanvien = $id";
             $result = $this->db->select($query);
             return $result;
         }
 
         function search($data){
-            $query = "SELECT * FROM tbl_nhanvien nv 
+            $query = "SELECT * FROM tbl_nhanvien nv
             JOIN tbl_taikhoannhanvien tk ON nv.id_nhanvien = tk.id
             WHERE (tenNhanVien LIKE '%$data%'
             OR soDT LIKE '%$data%' OR email LIKE '%$data%')AND tk.username NOT LIKE 'admin'";
