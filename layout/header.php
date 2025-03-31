@@ -135,7 +135,7 @@ Session::init();
                             </a>
                             <div class="login_dropdown">
                                 <a href="profile.php"><i class="fa-solid fa-user"></i>  Thông tin cá nhân</a>
-                                <a href="#"><i class="fa-solid fa-receipt"></i> Lịch sử mua hàng</a>
+                                <a href="order.php"><i class="fa-solid fa-receipt"></i>   Đơn hàng</a>
                                 <a href="?logout=true"><i class="fa-solid fa-right-from-bracket"></i>  Đăng xuất</a>
                             </div>
                         </div>';

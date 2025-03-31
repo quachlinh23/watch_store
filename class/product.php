@@ -10,147 +10,128 @@ class product {
         $this->db = new Database();
         $this->fm = new Format();
     }
-
+    
     public function insert($data, $files) {
         $product_name = mysqli_real_escape_string($this->db->link, $data['product_name']);
         $product_desc = mysqli_real_escape_string($this->db->link, $data['product_desc']);
         $product_type = intval($data['product_type']);
         $product_brand = intval($data['product_brand']);
     
-        // Kiểm tra và tạo thư mục upload nếu chưa tồn tại
+        // Định nghĩa thư mục upload
         $main_upload_dir = "uploads/product/";
         $sub_upload_dir = "uploads/product/subs/";
-        if (!is_dir($main_upload_dir)) {
-            mkdir($main_upload_dir, 0777, true) or die("Không thể tạo thư mục uploads/product!");
-        }
-        if (!is_dir($sub_upload_dir)) {
-            mkdir($sub_upload_dir, 0777, true) or die("Không thể tạo thư mục uploads/product/subs!");
-        }
+        $this->ensureDirectory($main_upload_dir);
+        $this->ensureDirectory($sub_upload_dir);
+    
+        $permited = array('jpg', 'jpeg', 'png', 'gif');
+        $max_size = 5 * 1024 * 1024; // 5MB
     
         // Xử lý ảnh chính
         $main_image = '';
         if (!empty($files['main_image']['name'])) {
-            $file_name = $files['main_image']['name'];
-            $file_size = $files['main_image']['size'];
-            $file_temp = $files['main_image']['tmp_name'];
-            $div = explode('.', $file_name);
-            $file_ext = strtolower(end($div));
-            $unique_image = substr(md5(time()), 0, 10) . '.' . $file_ext;
-            $main_image = $main_upload_dir . $unique_image;
-    
-            $permited = array('jpg', 'jpeg', 'png', 'gif');
-            if (!in_array($file_ext, $permited)) {
-                return "Chỉ chấp nhận định dạng ảnh: " . implode(', ', $permited);
-            }
-            if ($file_size > 5 * 1024 * 1024) {
-                return "Kích thước ảnh chính không được vượt quá 5MB!";
-            }
-            if (!move_uploaded_file($file_temp, $main_image)) {
-                return "Lỗi khi tải ảnh chính lên server! Kiểm tra quyền thư mục hoặc dung lượng server.";
+            $main_image = $this->uploadImage($files['main_image'], $main_upload_dir, $permited, $max_size);
+            if (is_string($main_image) && strpos($main_image, "Lỗi") === 0) {
+                return $main_image;
             }
         }
     
         // Thêm sản phẩm vào tbl_sanpham
         $query = "INSERT INTO tbl_sanpham (tenSanPham, id_loai, id_thuonghieu, mota, hinhAnh) 
-                    VALUES (?, ?, ?, ?, ?)";
+                VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->db->link->prepare($query);
         if (!$stmt) {
-            if (file_exists($main_image)) {
-                unlink($main_image);
-            }
+            $this->cleanup($main_image);
             return "Lỗi truy vấn: " . $this->db->link->error;
         }
         $stmt->bind_param("siiss", $product_name, $product_type, $product_brand, $product_desc, $main_image);
-        $result = $stmt->execute();
-        if ($result) {
-            $product_id = $this->db->link->insert_id;
-    
-            // Xử lý các ảnh phụ
-            if (!empty($files['product_images']['name'][0])) {
-                $image_count = count(array_filter($files['product_images']['name']));
-                if ($image_count > 3) {
-                    if (file_exists($main_image)) {
-                        unlink($main_image);
-                    }
-                    $this->delete($product_id);
-                    return "Chỉ được chọn tối đa 3 ảnh phụ!";
-                }
-    
-                for ($i = 0; $i < $image_count; $i++) {
-                    if (empty($files['product_images']['name'][$i])) continue;
-    
-                    $file_name = $files['product_images']['name'][$i];
-                    $file_size = $files['product_images']['size'][$i];
-                    $file_temp = $files['product_images']['tmp_name'][$i];
-                    $div = explode('.', $file_name);
-                    $file_ext = strtolower(end($div));
-                    $unique_image = substr(md5(time() . $i), 0, 10) . '.' . $file_ext;
-                    $uploaded_image = $sub_upload_dir . $unique_image;
-    
-                    if (!in_array($file_ext, $permited)) {
-                        if (file_exists($main_image)) {
-                            unlink($main_image);
-                        }
-                        for ($j = 0; $j < $i; $j++) {
-                            $prev_image = $sub_upload_dir . substr(md5(time() . $j), 0, 10) . '.' . strtolower(end(explode('.', $files['product_images']['name'][$j])));
-                            if (file_exists($prev_image)) {
-                                unlink($prev_image);
-                            }
-                        }
-                        $this->delete($product_id);
-                        return "Chỉ chấp nhận định dạng ảnh phụ: " . implode(', ', $permited);
-                    }
-                    if ($file_size > 5 * 1024 * 1024) {
-                        if (file_exists($main_image)) {
-                            unlink($main_image);
-                        }
-                        for ($j = 0; $j < $i; $j++) {
-                            $prev_image = $sub_upload_dir . substr(md5(time() . $j), 0, 10) . '.' . strtolower(end(explode('.', $files['product_images']['name'][$j])));
-                            if (file_exists($prev_image)) {
-                                unlink($prev_image);
-                            }
-                        }
-                        $this->delete($product_id);
-                        return "Kích thước ảnh phụ không được vượt quá 5MB!";
-                    }
-                    if (!move_uploaded_file($file_temp, $uploaded_image)) {
-                        if (file_exists($main_image)) {
-                            unlink($main_image);
-                        }
-                        for ($j = 0; $j < $i; $j++) {
-                            $prev_image = $sub_upload_dir . substr(md5(time() . $j), 0, 10) . '.' . strtolower(end(explode('.', $files['product_images']['name'][$j])));
-                            if (file_exists($prev_image)) {
-                                unlink($prev_image);
-                            }
-                        }
-                        $this->delete($product_id);
-                        return "Lỗi khi tải ảnh phụ lên server!";
-                    }
-    
-                    // Lưu ảnh phụ vào tbl_anhspphu
-                    $query = "INSERT INTO tbl_anhspphu (id_sanpham, hinhAnh) VALUES (?, ?)";
-                    $stmt = $this->db->link->prepare($query);
-                    if (!$stmt || !$stmt->bind_param("is", $product_id, $uploaded_image) || !$stmt->execute()) {
-                        if (file_exists($main_image)) {
-                            unlink($main_image);
-                        }
-                        for ($j = 0; $j <= $i; $j++) {
-                            $prev_image = $sub_upload_dir . substr(md5(time() . $j), 0, 10) . '.' . strtolower(end(explode('.', $files['product_images']['name'][$j])));
-                            if (file_exists($prev_image)) {
-                                unlink($prev_image);
-                            }
-                        }
-                        $this->delete($product_id);
-                        return "Lỗi khi lưu ảnh phụ: " . ($stmt ? $stmt->error : $this->db->link->error);
-                    }
-                }
-            }
-        } else {
-            if (file_exists($main_image)) {
-                unlink($main_image);
-            }
+        if (!$stmt->execute()) {
+            $this->cleanup($main_image);
             return "Thêm sản phẩm thất bại: " . $stmt->error;
         }
+    
+        $product_id = $this->db->link->insert_id;
+        $uploaded_sub_images = [];
+    
+        // Xử lý ảnh phụ
+        if (isset($files['product_images']) && !empty($files['product_images']['name']) && !empty($files['product_images']['name'][0])) {
+            $image_count = count(array_filter($files['product_images']['name']));
+            if ($image_count > 3) {
+                $this->rollback($product_id, $main_image, []);
+                return "Chỉ được chọn tối đa 3 ảnh phụ!";
+            }
+    
+            for ($i = 0; $i < $image_count; $i++) {
+                if (empty($files['product_images']['name'][$i])) continue;
+    
+                $sub_image = $this->uploadImage([
+                    'name' => $files['product_images']['name'][$i],
+                    'size' => $files['product_images']['size'][$i],
+                    'tmp_name' => $files['product_images']['tmp_name'][$i],
+                    'error' => $files['product_images']['error'][$i]
+                ], $sub_upload_dir, $permited, $max_size);
+    
+                if (is_string($sub_image) && strpos($sub_image, "Lỗi") === 0) {
+                    $this->rollback($product_id, $main_image, $uploaded_sub_images);
+                    return $sub_image;
+                }
+    
+                $uploaded_sub_images[] = $sub_image;
+    
+                // Lưu ảnh phụ vào tbl_anhspphu
+                $query = "INSERT INTO tbl_anhspphu (id_sanpham, hinhAnh) VALUES (?, ?)";
+                $stmt = $this->db->link->prepare($query);
+                if (!$stmt || !$stmt->bind_param("is", $product_id, $sub_image) || !$stmt->execute()) {
+                    $this->rollback($product_id, $main_image, $uploaded_sub_images);
+                    return "Lỗi khi lưu ảnh phụ: " . ($stmt ? $stmt->error : $this->db->link->error);
+                }
+            }
+        }
+    
+        return "Thêm sản phẩm thành công";
+    }
+    
+    // Các hàm hỗ trợ (giữ nguyên)
+    private function ensureDirectory($dir) {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true) or die("Không thể tạo thư mục $dir!");
+        }
+    }
+    
+    private function uploadImage($file, $target_dir, $permited, $max_size) {
+        if ($file['error'] != 0) return "Lỗi file upload!";
+        
+        $file_name = $file['name'];
+        $file_size = $file['size'];
+        $file_temp = $file['tmp_name'];
+        $div = explode('.', $file_name);
+        $file_ext = strtolower(end($div));
+        $unique_image = substr(md5(time() . rand()), 0, 10) . '.' . $file_ext;
+        $target_path = $target_dir . $unique_image;
+    
+        if (!in_array($file_ext, $permited)) {
+            return "Chỉ chấp nhận định dạng ảnh: " . implode(', ', $permited);
+        }
+        if ($file_size > $max_size) {
+            return "Kích thước ảnh không được vượt quá 5MB!";
+        }
+        if (!move_uploaded_file($file_temp, $target_path)) {
+            return "Lỗi khi tải ảnh lên server!";
+        }
+        return $target_path;
+    }
+    
+    private function cleanup($file) {
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    }
+    
+    private function rollback($product_id, $main_image, $sub_images) {
+        $this->cleanup($main_image);
+        foreach ($sub_images as $sub_image) {
+            $this->cleanup($sub_image);
+        }
+        $this->delete($product_id);
     }
 
     public function show() {

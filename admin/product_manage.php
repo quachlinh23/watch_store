@@ -52,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
         .image-preview-container img { max-width: 100px; margin: 5px; }
         .image-placeholder { width: 100px; height: 100px; background: #f0f0f0; margin: 5px; display: inline-block; }
         .error { color: red; font-size: 12px; display: none; }
+        #selectImagesBtn { padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #selectImagesBtn:hover { background: #0056b3; }
     </style>
 </head>
 <body>
@@ -76,12 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
                         </div>
                         <div class="form-group">
                             <label for="product_images_add">Ảnh phụ (tối đa 3):</label>
-                            <input type="file" id="product_images_add" name="product_images[]" accept="image/*" multiple onchange="previewImages(this, 'image-preview-add')" />
-                            <div id="image-preview-add" class="image-preview-container">
-                                <div class="image-placeholder"></div>
-                                <div class="image-placeholder"></div>
-                                <div class="image-placeholder"></div>
-                            </div>
+                            <button type="button" id="selectImagesBtn" onclick="document.getElementById('product_images_add').click();">Chọn ảnh phụ</button>
+                            <input type="file" id="product_images_add" accept="image/*" style="display: none;" onchange="previewImages(this, 'image-preview-add')" />
+                            <div id="image-preview-add" class="image-preview-container"></div>
+                            <div id="hidden-images-add"></div> <!-- Khu vực chứa input ẩn -->
                             <span class="error" id="erroranhphu_add"></span>
                         </div>
                     </div>
@@ -290,43 +290,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
 
         function previewImages(input, previewId) {
             const previewContainer = document.getElementById(previewId);
-            const placeholders = previewContainer.querySelectorAll('.image-placeholder');
+            const hiddenContainer = document.getElementById('hidden-images-add');
             const files = input.files;
             const selectedFiles = previewId.includes('add') ? selectedFilesAdd : selectedFilesEdit;
 
             if (files) {
-                if (files.length > 3) {
-                    alert('Chỉ được chọn tối đa 3 ảnh phụ!');
+                const totalImages = selectedFiles.length + files.length;
+                if (totalImages > 3) {
+                    alert('Chỉ được chọn tối đa 3 ảnh phụ! Bạn đã chọn ' + selectedFiles.length + ' ảnh.');
                     input.value = '';
                     return;
                 }
 
-                selectedFiles.length = 0;
                 for (let i = 0; i < files.length; i++) {
-                    selectedFiles.push(files[i]);
-                }
+                    const file = files[i];
+                    selectedFiles.push(file);
 
-                selectedFiles.forEach((file, index) => {
-                    if (index < 3) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.className = 'image-preview';
-                            placeholders[index].replaceWith(img);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.style.display = 'inline-block';
+                        imgWrapper.style.position = 'relative';
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'image-preview';
+                        img.style.maxWidth = '100px';
+                        img.style.margin = '5px';
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '×';
+                        removeBtn.style.position = 'absolute';
+                        removeBtn.style.top = '0';
+                        removeBtn.style.right = '0';
+                        removeBtn.style.background = 'red';
+                        removeBtn.style.color = 'white';
+                        removeBtn.style.border = 'none';
+                        removeBtn.style.cursor = 'pointer';
+                        removeBtn.onclick = function() {
+                            imgWrapper.remove();
+                            const index = selectedFiles.indexOf(file);
+                            if (index > -1) {
+                                selectedFiles.splice(index, 1);
+                            }
+                            updateHiddenInputs(hiddenContainer, selectedFiles);
                         };
-                        reader.readAsDataURL(file);
-                    }
-                });
 
-                for (let i = files.length; i < 3; i++) {
-                    if (!placeholders[i].parentNode) {
-                        const placeholder = document.createElement('div');
-                        placeholder.className = 'image-placeholder';
-                        previewContainer.appendChild(placeholder);
-                    }
+                        imgWrapper.appendChild(img);
+                        imgWrapper.appendChild(removeBtn);
+                        previewContainer.appendChild(imgWrapper);
+
+                        // Cập nhật input ẩn
+                        updateHiddenInputs(hiddenContainer, selectedFiles);
+                    };
+                    reader.readAsDataURL(file);
                 }
+
+                input.value = '';
             }
+        }
+
+        function updateHiddenInputs(container, files) {
+            container.innerHTML = '';
+            files.forEach((file, index) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.name = 'product_images[]';
+                input.style.display = 'none';
+                input.files = createFileList(file); // Tạo FileList từ file
+                container.appendChild(input);
+            });
+        }
+
+        // Hàm tạo FileList từ file (không hoạt động trực tiếp, cần dùng DataTransfer)
+        function createFileList(file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            return dataTransfer.files;
         }
 
         function validateForm(formId) {
@@ -378,8 +418,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
             form.reset();
             const previewAdd = document.getElementById('image-preview-add');
             const previewEdit = document.getElementById('image-preview-edit');
+            const hiddenAdd = document.getElementById('hidden-images-add');
             if (modalId === 'add-modal' && previewAdd) {
-                previewAdd.innerHTML = '<div class="image-placeholder"></div><div class="image-placeholder"></div><div class="image-placeholder"></div>';
+                previewAdd.innerHTML = '';
+                hiddenAdd.innerHTML = '';
                 selectedFilesAdd = [];
             }
             if (modalId === 'edit-modal' && previewEdit) {
