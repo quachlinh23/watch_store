@@ -32,12 +32,12 @@
         }
 
         public function searchCustomers($keyword) {
-            $keyword = trim($keyword); // Loại bỏ khoảng trắng thừa
-            $keyword = addslashes($keyword); // Tránh lỗi SQL khi có dấu nháy
+            $keyword = trim($keyword);
+            $keyword = addslashes($keyword);
         
             $query = "SELECT * FROM tbl_taikhoan WHERE username LIKE '%$keyword%'";
         
             return $this->db->select($query);
-        } 
+        }
     }
 ?>

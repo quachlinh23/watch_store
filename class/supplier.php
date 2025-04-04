@@ -75,13 +75,13 @@
 
         public function updateStatus($id, $status) {
             $id = intval($id);
-            $newStatus = ($status == 1) ? 0 : 1; // Đảo trạng thái
+            $newStatus = ($status == 1) ? 0 : 1;
         
             $query = "UPDATE tbl_nhacungcap SET trangThai = $newStatus WHERE id_nhacungcap = $id";
         
-            $result = $this->db->update($query); // Gọi phương thức update
+            $result = $this->db->update($query);
         
-            return ($result) ? true : false; // Trả về kết quả cập nhật
+            return ($result) ? true : false;
         }
     }
 ?>

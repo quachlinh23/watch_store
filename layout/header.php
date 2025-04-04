@@ -50,8 +50,6 @@ Session::init();
     }
 </script>
 <?php 
-    // include 'lib/session.php';
-    // Session::init();
 	$check = Session::get('customer_login');
 	$name = Session::get('customer_name');
     $id_cus = Session::get("customer_id");
@@ -71,11 +69,24 @@ Session::init();
 	$car = new cart();
 	$cus = new customerlogin();
 
-	if (isset($_GET['logout'])) {
-		Session::set('customer_login', false);
-		header("Location: " . $_SERVER['PHP_SELF']);
-		exit();
-	}
+	// if (isset($_GET['logout'])) {
+	// 	Session::set('customer_login', false);
+	// 	header("Location: " . $_SERVER['PHP_SELF']);
+	// 	exit();
+	// }
+
+    if (isset($_GET['logout'])) {
+        Session::set('customer_login', false);
+        $current_page = basename($_SERVER['PHP_SELF']);
+        // Ghi log để kiểm tra (không in trực tiếp)
+        error_log("Current page: " . $current_page); // Ghi vào log server
+        if ($current_page === 'profile.php' || $current_page === 'order.php') {
+            header("Location: index.php");
+        } else {
+            header("Location: " . $_SERVER['PHP_SELF']);
+        }
+        exit();
+    }
 ?>
 <header class="header">
     <div class="header_top">

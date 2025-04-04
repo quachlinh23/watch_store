@@ -48,7 +48,6 @@
     position: relative;
     display: inline-block;
     color: white;
-    /* text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8); */
     overflow: hidden;
 }
 
@@ -288,9 +287,9 @@
     font-weight: bold;
 }
 
-/* Khi button được chọn (active) */
 .btns_filter button.active {
     background-color: #ff9800;
     color: white;
     border-color: #ff9800;
 }
+
