@@ -67,12 +67,11 @@
         
         public function show(){
             // $querry = "SELECT * FROM tbl_sanpham";
-            $query = "SELECT sp.tenSanPham, sp.hinhAnh, sp.mota, lsp.tenLoai, th.tenThuongHieu, 
+            $query = "SELECT sp.tenSanPham, sp.hinhAnh, sp.mota, lsp.tenLoai, th.tenThuongHieu,
                 sp.giaBan, sp.type 
                 FROM tbl_sanpham AS sp
                 INNER JOIN tbl_loaisanpham AS lsp ON sp.id_loai = lsp.id_loai
                 INNER JOIN tbl_thuonghieu AS th ON sp.id_thuonghieu = th.id_thuonghieu";
-; 
             $result = $this->db->select($query);
             return $result;
         }

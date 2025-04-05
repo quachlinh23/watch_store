@@ -49,7 +49,7 @@ Session::init();
         }
     }
 </script>
-<?php 
+<?php
 	$check = Session::get('customer_login');
 	$name = Session::get('customer_name');
     $id_cus = Session::get("customer_id");
@@ -78,11 +78,10 @@ Session::init();
     if (isset($_GET['logout'])) {
         Session::set('customer_login', false);
         $current_page = basename($_SERVER['PHP_SELF']);
-        // Ghi log để kiểm tra (không in trực tiếp)
-        error_log("Current page: " . $current_page); // Ghi vào log server
-        if ($current_page === 'profile.php' || $current_page === 'order.php') {
+        if ($current_page === 'profile.php' || $current_page === 'order.php' 
+        || $current_page === 'details.php' || $current_page === 'productbybrand.php') {
             header("Location: index.php");
-        } else {
+        }else {
             header("Location: " . $_SERVER['PHP_SELF']);
         }
         exit();

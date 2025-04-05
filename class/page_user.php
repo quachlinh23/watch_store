@@ -78,6 +78,49 @@ class Page_user {
             'current_page' => $page
         ];
     }
+
+    public function SearchProductsByKey($keyword = '', $page = 1, $limit = 10, $filters = []) {
+        $offset = ($page - 1) * $limit;
     
+        // Xây dựng điều kiện WHERE
+        $where = "WHERE ct.soluongTon > 0"; // Chỉ lấy sản phẩm còn hàng
+    
+        // Tìm kiếm theo từ khóa (tên sản phẩm)
+        if (!empty($keyword)) {
+            $escapedKeyword = mysqli_real_escape_string($this->db->link,$keyword);
+            $where .= " AND sp.tenSanPham LIKE '%$escapedKeyword%'";
+        }
+    
+        // Lọc theo danh mục nếu có
+        if (!empty($filters['category'])) {
+            $category_id = intval($filters['category']);
+            $where .= " AND sp.id_loai = $category_id";
+        }
+    
+        // Truy vấn lấy danh sách sản phẩm
+        $sql = "SELECT sp.*, ct.soluongTon, ct.giaBan
+                FROM tbl_sanpham sp
+                JOIN tbl_chitietsanpham ct ON sp.maSanPham = ct.masanpham
+                $where
+                LIMIT $offset, $limit";
+        $products = $this->db->select($sql);
+    
+        // Đếm tổng số sản phẩm phù hợp
+        $total_sql = "SELECT COUNT(*) as total
+                    FROM tbl_sanpham sp
+                    JOIN tbl_chitietsanpham ct ON sp.maSanPham = ct.masanpham
+                    $where";
+        $total_result = $this->db->select($total_sql);
+        $total_row = $total_result ? $total_result->fetch_assoc() : ['total' => 0];
+        $total_products = $total_row['total'];
+        $total_pages = ceil($total_products / $limit);
+    
+        return [
+            'products' => $products,
+            'total_pages' => $total_pages,
+            'current_page' => $page,
+            'total_products' => $total_products
+        ];
+    }
 }
 ?>

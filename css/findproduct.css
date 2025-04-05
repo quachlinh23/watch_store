@@ -1,0 +1,49 @@
+/* Reset chung */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Container chính */
+.contain {
+    width: 90%;
+    margin: 40px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+/* Tiêu đề */
+.contain h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+.contain h3 strong {
+    font-weight: bold;
+    font-size: 20px; /* Tăng kích thước */
+    color: red; /* Màu xanh để nổi bật */
+}
+
+
+/* Grid sản phẩm */
+.product_brands_right_bottom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 5px;
+    row-gap: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product_brands_right_bottom {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .product_brands_right_bottom {
+        grid-template-columns: 1fr;
+    }
+}

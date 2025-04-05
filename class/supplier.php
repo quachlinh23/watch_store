@@ -60,8 +60,8 @@
         
             // Nếu không trùng, tiến hành cập nhật
             $query = "UPDATE tbl_nhacungcap 
-                      SET tenNCC = '$tenNCC', diaChi = '$diaChi', soDT = '$soDT' 
-                      WHERE id_nhacungcap = '$idNCC'";
+                    SET tenNCC = '$tenNCC', diaChi = '$diaChi', soDT = '$soDT' 
+                    WHERE id_nhacungcap = '$idNCC'";
             $updateResult = $this->db->update($query);
         
             return $updateResult;

@@ -1,8 +1,8 @@
 /* Container chính */
 .container {
     width: 90%;
-    margin: 30px auto;
-    padding: 20px;
+    margin: 20px auto;
+    /* padding: 20px; */
     border-radius: 10px;
 }
 .breadcrumbs_wrapper{
@@ -236,14 +236,6 @@
     margin-bottom: 15px;
 }
 
-.line_1 {
-    width: 50px;
-    height: 5px;
-    background: #007bff;
-    margin-bottom: 15px;
-    border-radius: 2px;
-}
-
 .desc {
     font-size: 20px;
     color:#e88b1b;
@@ -357,51 +349,459 @@
     display: flex;
     gap: 10px;
     margin-top: 20px;
-    background-color: #007bff;
+    background: linear-gradient(135deg, #007bff, #00c4ff);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.tabs:hover {
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
 }
 
 .tab-btn {
-    padding: 10px;
+    flex: 1;
+    padding: 12px 20px;
     border: none;
     background: none;
     cursor: pointer;
     font-size: 16px;
-    border-bottom: 3px solid transparent;
-    transition: 0.3s;
+    color: #fff;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
 
+.tab-btn:hover, .tab-btn.active {
+    color: #fff;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1); /* Nền nhẹ khi hover/active */
+    transform: translateY(-2px);
+}
+
+.tab-btn:hover::before, .tab-btn.active::before {
+    width: 100%;
 }
 
 .tab-btn.active {
-    border-bottom: 3px solid #007bff;
-    font-weight: bold;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Nội dung tab */
 .tab-content {
     display: none;
-    padding: 15px 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 10px;
+    animation: slideUp 0.4s ease; /* Hiệu ứng trượt lên */
 }
 
 .tab-content.active {
     display: block;
 }
 
-/* Bảng hướng dẫn chọn size */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+.tab-content h3 {
+    font-size: 22px;
+    color: #1a1a1a;
+    margin-bottom: 15px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #007bff, #ff6b6b);
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
-th, td {
-    padding: 10px;
+.tab-content ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.tab-content ul li {
+    font-size: 16px;
+    color: #4a4a4a;
+    line-height: 1.8;
+    position: relative;
+    padding-left: 25px;
+    transition: color 0.3s ease;
+}
+
+.tab-content ul li::before {
+    content: '✔';
+    position: absolute;
+    left: 0;
+    color: #007bff;
+    font-size: 18px;
+}
+
+.tab-content ul li:hover {
+    color: #007bff;
+}
+
+.tab-content p {
+    font-size: 16px;
+    color: #4a4a4a;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+
+.tab-content p:hover {
+    color: #ff6b6b;
+}
+
+
+/* Rating Summary */
+.rating-summary {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.rating-score {
     text-align: center;
-    border: 1px solid #ddd;
 }
 
-th {
+.score {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.score .fa-star {
+    color: #f39c12;
+    margin-right: 5px;
+}
+
+.satisfied {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.satisfied .fa-info-circle {
+    color: #007bff;
+    cursor: pointer;
+}
+
+.total-reviews {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+.write-review {
+    padding: 10px 20px;
     background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.write-review:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.rating-distribution {
+    flex: 1;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stars {
+    font-size: 14px;
+    color: #333;
+    width: 40px;
+}
+
+.stars .fa-star {
+    color: #f39c12;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background: #007bff;
+    transition: width 0.5s ease;
+}
+
+.percentage {
+    font-size: 14px;
+    color: #333;
+    width: 50px;
+    text-align: right;
+}
+
+/* Định dạng chung cho modal */
+.review-modal {
+    display: none; /* Ẩn modal mặc định */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Màu nền tối */
+    z-index: 1000; /* Đặt modal ở trên cùng */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Nội dung modal */
+.modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px; /* Bo góc mềm mại hơn */
+    width: 500px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Bóng đổ hiện đại */
+    animation: fadeIn 0.3s ease; /* Hiệu ứng xuất hiện */
+}
+
+/* Hiệu ứng fade-in */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Nút đóng modal */
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.close-modal:hover {
+    color: #ff4444; /* Màu đỏ khi hover */
+    transform: rotate(90deg); /* Xoay nhẹ khi hover */
+}
+
+/* Tiêu đề modal */
+.review-modal-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #2c3e50; /* Màu xanh đậm hiện đại */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.modal-content hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ddd, transparent); /* Gradient viền */
+    margin: 0 0 20px 0;
+}
+
+/* Thông tin sản phẩm */
+.product-info-modal {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    background: #f8f9fa; /* Nền nhẹ */
+    padding: 10px;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.product-info-modal:hover {
+    transform: translateY(-3px); /* Hiệu ứng nâng nhẹ khi hover */
+}
+
+.product-info-modal img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-info-modal p {
+    font-size: 16px;
+    color: #34495e; /* Màu chữ đậm hơn */
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Đánh giá sao */
+.rating-stars {
+    display: flex;
+    flex-direction: row-reverse; /* 5 sao bên trái, 1 sao bên phải */
+    justify-content: center; /* Căn giữa sao */
+    gap: 12px; /* Khoảng cách đều */
+    margin-bottom: 25px;
+}
+
+.rating-stars input {
+    display: none; /* Ẩn input radio */
+}
+
+.rating-stars label {
+    font-size: 0; /* Ẩn chữ, chỉ giữ sao */
+    cursor: pointer;
+    color: #ddd; /* Màu sao mặc định */
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Icon sao */
+.rating-stars i {
+    font-size: 28px; /* Sao lớn hơn, hiện đại */
+}
+
+/* Tô màu sao khi được chọn hoặc hover */
+.rating-stars input:checked ~ label i,
+.rating-stars label:hover ~ label i,
+.rating-stars label:hover i {
+    color: #f1c40f; /* Màu vàng sáng hơn */
+    transform: scale(1.1); /* Phóng to nhẹ khi hover/chọn */
+}
+
+/* Textarea cho cảm nhận */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+    font-size: 15px;
+    resize: vertical;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #3498db; /* Viền xanh khi focus */
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+    outline: none;
+}
+
+/* Nút gửi đánh giá */
+.submit-review {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #3498db, #2980b9); /* Gradient hiện đại */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.submit-review:hover {
+    transform: translateY(-2px); /* Nâng nhẹ khi hover */
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); /* Bóng đổ */
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* khoảng cách giữa các khung */
+    padding: 20px;
+}
+
+.review-item {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.review-name {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.review-stars {
+    color: gold;
+    margin-bottom: 8px;
+}
+
+.review-text {
+    margin: 0;
+    color: #555;
+}
+
+
+/* Textarea cho cảm nhận */
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    font-size: 14px;
+    resize: vertical;
+}
+
+/* Tùy chọn khác */
+.options label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Nút gửi đánh giá */
+.submit-review {
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
     color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-review:hover {
+    background-color: #2980b9;
+}
+
+/* Review List */
+.review-list p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.review-list p .fa-star {
+    color: #f39c12;
 }
 
 
@@ -497,4 +897,50 @@ th {
 
 .shrinking {
     animation: shrink 0.5s forwards;
+}
+
+review-list .review-item {
+    display: block;
+}
+
+/* Ẩn từ đánh giá thứ 4 trở đi ban đầu */
+.review-list .review-item:nth-child(n+4) {
+    display: none;
+}
+
+/* Khi có class "show-all", hiển thị toàn bộ */
+.review-list.show-all .review-item {
+    display: block;
+}
+
+/* Nút "Xem thêm" */
+.toggle-reviews-btn {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.toggle-reviews-btn:hover {
+    background-color: #2980b9;
+}
+
+.review-list-wrapper {
+    max-height: 450px; /* hoặc chiều cao bạn muốn */
+    overflow-y: auto;
+    padding-right: 8px; /* tránh che nội dung bởi scrollbar */
+}
+
+/* Tùy chỉnh scrollbar nếu muốn (dành cho Chrome) */
+.review-list-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.review-list-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
 }
