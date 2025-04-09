@@ -122,5 +122,26 @@ class Page_user {
             'total_products' => $total_products
         ];
     }
-}
+
+        #Hàm load danh sách các sản phẩm lên trang index
+        public function loadProduct($brandId){
+            $brandId = intval($brandId);
+            $query = "SELECT sp.*, ct.giaBan
+                    FROM tbl_sanpham sp
+                    JOIN tbl_chitietsanpham ct ON sp.maSanPham = ct.masanpham
+                    WHERE sp.id_thuonghieu = $brandId AND ct.soluongTon > 0
+                    LIMIT 5";
+            
+            $result = $this->db->select($query);
+            
+            $products = [];
+            if ($result && $result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $products[] = $row;
+                }
+            }
+        
+            return $products; // Trả về dạng mảng
+        }
+    }
 ?>

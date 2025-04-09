@@ -1,6 +1,8 @@
 <?php
 	include_once "class/brand.php";
+	include_once "class/page_user.php";
 	$brand = new brand();
+	$page_user = new page_user();
 ?>
 <!DOCTYPE HTML>
 	<head>
@@ -13,7 +15,8 @@
 		<link rel="stylesheet" href="css/Streng.css">
 		<link rel="stylesheet" href="css/brand.css">
 		<link rel="stylesheet" href="css/index.css">
-		<link rel="stylesheet" href="css/product_1.css">
+		<!-- <link rel="stylesheet" href="css/product_1.css"> -->
+		<link rel="stylesheet" href="css/ThuNghiem.css">
 		<script src="js/index.js"></script>
 		<script src="js/productbybrand.js"></script>
 		<script src="js/new.js"></script>
@@ -111,352 +114,171 @@
 				</div>
 			</section>
 
-			<section class="product_brands hidden">
-				<div class="product_brands_left">
-					<a href="productbybrand.php?id=7"><img src="images/bannercasio.png" alt=""></a>
-				</div>
-				<div class="product_brands_right">
-					<div class="product_brands_right_top">
-						<h2 class="brand_name">Đồng Hồ CASIO</h2>
-						<div class="btns_filter">
-							<button>Nổi bật</button>
-							<button>Nữ</button>
-							<button>Nam</button>
+			<!-- Thương hiệu CASIO -->
+			<?php
+				$products = $page_user->loadProduct(7);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands hidden">
+					<div class="product_brands_left">
+						<a href="productbybrand.php?id=7"><img src="images/bannercasio.png" alt=""></a>
+					</div>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ CASIO</h2>
+							<a href="productbybrand.php?id=7" class="product_by_brand_details">
+								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
+							</a>
 						</div>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</section>
+			<?php
+			}
+			?>
 
-						<a href="productbybrand.php" class="product_by_brand_details">
-							Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
-						</a>
+			<!-- Thương hiệu ORIENT -->
+			<?php
+				$products = $page_user->loadProduct(9);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands">
+					<div class="product_brands_left">
+						<a href=""><img src="images/bannerOrient.png" alt=""></a>
 					</div>
-					<div class="product_brands_right_bottom">
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ ORIENT</h2>
+							<a href="productbybrand.php?id=9" class="product_by_brand_details">
+								Sản Phẩm Khác <i class="fas fa-arrow-right"></i>
+							</a>
 						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
 								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
+							<?php endforeach; ?>
 						</div>
 					</div>
-				</div>
-			</section>
+				</section>
+			<?php
+			}
+			?>
 
-			<section class="product_brands hidden">
-				<div class="product_brands_left">
-					<a href=""><img src="images/bannerOrient.png" alt=""></a>
-				</div>
-				<div class="product_brands_right">
-					<div class="product_brands_right_top">
-						<h2 class="brand_name">Đồng Hồ ORIENT</h2>
-						<div class="btns_filter">
-								<button>Nổi bật</button>
-								<button>Nữ</button>
-								<button>Nam</button>
-						</div>
-						<a href="productbybrand.php?id=9" class="product_by_brand_details">
-							Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
-						</a>
+			<!-- Thương hiệu CITIZEN-->
+			<?php
+				$products = $page_user->loadProduct(10);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands hidden">
+					<div class="product_brands_left">
+						<a href=""><img src="images/bannercitzent.png" alt=""></a>
 					</div>
-					<div class="product_brands_right_bottom">
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ CITIZEN</h2>
+							<a href="productbybrand.php?id=10" class="product_by_brand_details">
+								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
+							</a>
 						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
 								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
+							<?php endforeach; ?>
 						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
+					</div>
+				</section>
+			<?php
+			}
+			?>
 
+			<!-- Thương hiệu Rolex-->
+			<?php
+				$products = $page_user->loadProduct(6);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands hidden">
+					<div class="product_brands_left">
+						<a href="productbybrand.php?id=6"><img src="images/bannercitzent.png" alt=""></a>
 					</div>
-				</div>
-			</section>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ Rolex</h2>
+							<a href="productbybrand.php?id=6" class="product_by_brand_details">
+								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
+							</a>
+						</div>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</section>
+			<?php
+			}
+			?>
 
-			<section class="product_brands hidden">
-				<div class="product_brands_left">
-					<a href=""><img src="images/bannercitzent.png" alt=""></a>
-				</div>
-				<div class="product_brands_right">
-					<div class="product_brands_right_top">
-						<h2 class="brand_name">Đồng Hồ CITIZEN</h2>
-						<div class="btns_filter">
-								<button>Nổi bật</button>
-								<button>Nữ</button>
-								<button>Nam</button>
-						</div>
-						<a href="productbybrand.php?id=10" class="product_by_brand_details">
-							Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
-						</a>
-					</div>
-					<div class="product_brands_right_bottom">
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section class="product_brands hidden">
-				<div class="product_brands_left">
-					<a href="productbybrand.php?id=6"><img src="images/bannercitzent.png" alt=""></a>
-				</div>
-				<div class="product_brands_right">
-					<div class="product_brands_right_top">
-						<h2 class="brand_name">Đồng Hồ Rolex</h2>
-						<div class="btns_filter">
-								<button>Nổi bật</button>
-								<button>Nữ</button>
-								<button>Nam</button>
-						</div>
-						<a href="productbybrand.php?id=6" class="product_by_brand_details">
-							Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
-						</a>
-					</div>
-					<div class="product_brands_right_bottom">
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-						<div class="product_1">
-							<div class="pro_img">
-								<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-							</div>
-							<div class="descrise">
-								<div class="pro_name">
-									<p>Đồng hồ casio</p>
-								</div>
-								<div class="pro_price">
-									<p>100.000đ</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-
+			<!-- Danh sách các thương hiệu-->
 			<section class="brand_hot hidden">
 				<div class="brand_hot_header">
 					<p>Thương Hiệu Nổi Bật</p>
@@ -512,6 +334,7 @@
 					
 				</script>
 			</section>
+
 		</div>
 	</div>
 	<?php include 'layout/footer.php';?>

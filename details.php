@@ -125,10 +125,10 @@ if (isset($_POST['submit_review'])) {
             font-family: Arial, sans-serif;
         }
         .review-stars .fas.fa-star {
-            color: #f5c518; /* Màu vàng cho ngôi sao được chọn */
+            color: #f5c518;
         }
         .review-stars .far.fa-star {
-            color: #ccc; /* Màu xám cho ngôi sao không được chọn */
+            color: #ccc;
         }
     </style>
 </head>
