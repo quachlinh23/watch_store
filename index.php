@@ -15,8 +15,6 @@
 		<link rel="stylesheet" href="css/Streng.css">
 		<link rel="stylesheet" href="css/brand.css">
 		<link rel="stylesheet" href="css/index.css">
-		<!-- <link rel="stylesheet" href="css/product_1.css"> -->
-		<link rel="stylesheet" href="css/ThuNghiem.css">
 		<script src="js/index.js"></script>
 		<script src="js/productbybrand.js"></script>
 		<script src="js/new.js"></script>
@@ -40,77 +38,37 @@
 	?>
 	<div class="main">
 		<div class="content">
+			<!-- Hiển thị danh sách các sản phẩm mới -->
 			<?php include 'layout/strengs.php';?>
 			<section class="product_new">
 				<div class="product_new_top">
 					<img src="images/sanphammoi.png" alt="">
 				</div>
 				<div class="product_new_bottom">
+					<?php
+						$products = $page_user->loadNewProduct();
+						foreach ($products as $item): 
+					?>
 					<div class="product_1">
 						<div class="pro_img">
-							<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
+							<a href="details.php?id=<?= $item['maSanPham'] ?>">
+								<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+							</a>
 						</div>
 						<div class="descrise">
 							<div class="pro_name">
-								<p>Đồng hồ casio</p>
+								<a href="details.php?id=<?= $item['maSanPham'] ?>" 
+									class="linktoDetails"
+								>
+									<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+								</a>
 							</div>
 							<div class="pro_price">
-								<p>100.000đ</p>
+								<p><?= number_format($item['giaBanSP'], 0, ',', '.') ?>đ</p>
 							</div>
 						</div>
 					</div>
-					<div class="product_1">
-						<div class="pro_img">
-							<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-						</div>
-						<div class="descrise">
-							<div class="pro_name">
-								<p>Đồng hồ casio</p>
-							</div>
-							<div class="pro_price">
-								<p>100.000đ</p>
-							</div>
-						</div>
-					</div>
-					<div class="product_1">
-						<div class="pro_img">
-							<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-						</div>
-						<div class="descrise">
-							<div class="pro_name">
-								<p>Đồng hồ casio</p>
-							</div>
-							<div class="pro_price">
-								<p>100.000đ</p>
-							</div>
-						</div>
-					</div>
-					<div class="product_1">
-						<div class="pro_img">
-							<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-						</div>
-						<div class="descrise">
-							<div class="pro_name">
-								<p>Đồng hồ casio</p>
-							</div>
-							<div class="pro_price">
-								<p>100.000đ</p>
-							</div>
-						</div>
-					</div>
-					<div class="product_1">
-						<div class="pro_img">
-							<a href="details.php"><img src="images/sanphamdemo.jpg" alt=""></a>
-						</div>
-						<div class="descrise">
-							<div class="pro_name">
-								<p>Đồng hồ casio</p>
-							</div>
-							<div class="pro_price">
-								<p>100.000đ</p>
-							</div>
-						</div>
-					</div>
+				<?php endforeach; ?>
 				</div>
 			</section>
 
@@ -140,7 +98,11 @@
 									</div>
 									<div class="descrise">
 										<div class="pro_name">
-											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											<a href="details.php?id=<?= $item['maSanPham'] ?>" 
+												class="linktoDetails"
+											>
+												<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											</a>
 										</div>
 										<div class="pro_price">
 											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
@@ -181,7 +143,11 @@
 									</div>
 									<div class="descrise">
 										<div class="pro_name">
-											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											<a href="details.php?id=<?= $item['maSanPham'] ?>" 
+												class="linktoDetails"
+											>
+												<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											</a>
 										</div>
 										<div class="pro_price">
 											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
@@ -222,7 +188,11 @@
 									</div>
 									<div class="descrise">
 										<div class="pro_name">
-											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											<a href="details.php?id=<?= $item['maSanPham'] ?>" 
+												class="linktoDetails"
+											>
+												<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											</a>
 										</div>
 										<div class="pro_price">
 											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
@@ -244,12 +214,53 @@
 			?>
 				<section class="product_brands hidden">
 					<div class="product_brands_left">
-						<a href="productbybrand.php?id=6"><img src="images/bannercitzent.png" alt=""></a>
+						<a href="productbybrand.php?id=6"><img src="images/BannnerChung.jpg" alt=""></a>
 					</div>
 					<div class="product_brands_right">
 						<div class="product_brands_right_top">
 							<h2 class="brand_name">Đồng Hồ Rolex</h2>
 							<a href="productbybrand.php?id=6" class="product_by_brand_details">
+								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
+							</a>
+						</div>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</section>
+			<?php
+			}
+			?>
+
+			<!-- Thương hiệu Tissot-->
+			<?php
+				$products = $page_user->loadProduct(11);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands hidden">
+					<div class="product_brands_left">
+						<a href="productbybrand.php?id=11"><img src="images/BannnerChung.jpg" alt=""></a>
+					</div>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ Tissot</h2>
+							<a href="productbybrand.php?id=11" class="product_by_brand_details">
 								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
 							</a>
 						</div>

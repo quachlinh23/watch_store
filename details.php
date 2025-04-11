@@ -3,6 +3,9 @@ session_start();
 include_once "class/brand.php";
 include_once "class/product.php";
 include_once "class/rating.php";
+include_once "class/cart.php";
+
+$cart = new Cart();
 $brand = new brand();
 $product = new product();
 $rating = new Rating();
@@ -104,6 +107,28 @@ if (isset($_POST['submit_review'])) {
         }
     }
 }
+
+if (isset($_POST['add_to_cart'])) {
+    header('Content-Type: application/json');
+    $productId = $_POST['product_id'];
+    $quantity = (int)$_POST['quantity'];
+
+    if (!$userId) {
+        echo json_encode(['status' => 'error', 'message' => 'Vui lòng đăng nhập để thêm vào giỏ hàng!']);
+        exit;
+    }
+
+    $cartId = $cart->getcartidbycustomer($userId);
+    if ($cartId == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy giỏ hàng của bạn!']);
+        exit;
+    }
+
+    $result = $cart->addtocart($cartId, $productId, $quantity);
+    echo json_encode($result);
+    exit;
+}
+
 ?>
 <!DOCTYPE HTML>
 <head>
@@ -112,7 +137,7 @@ if (isset($_POST['submit_review'])) {
     <title>Details</title>
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">
-    <link rel="stylesheet" href="css/details.css">
+    <link rel="stylesheet" href="css/details_1.css">
     <script src="script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="js/details.js"></script>
@@ -181,18 +206,19 @@ if (isset($_POST['submit_review'])) {
                     <p class="desc"><?php echo $productInfo['mota']?></p>
                     <div class="brand"><strong>Thương hiệu:</strong><?php echo $productInfo['tenThuongHieu']?></div>
                     <div class="price"><strong>Giá bán: </strong><span><?php echo $formatted_price?>₫</span></div>
-                    <div class="conlai"><strong>Còn lại:</strong><span><?php echo $productInfo['soluongTon']?></span></div>
+                    <div class="conlai"><strong>Còn lại:  </strong><span><?php echo $productInfo['soluongTon']?></span></div>
 
-                    <form class="cart-options">
+                    <form class="cart-options" id="cartForm">
                         <div class="quantity">
                             <p class="soluong"><strong>Số lượng:</strong></p>
-                            <button class="qty-btn" onclick="event.preventDefault(); updateQuantity(-1)">-</button>
-                            <input type="number" id="quantity" value="1" min="1" max="<?php echo $productInfo['soluongTon']; ?>">
-                            <button class="qty-btn" onclick="event.preventDefault(); updateQuantity(1)">+</button>
+                            <button class="qty-btn" type="button" onclick="updateQuantity(-1)">-</button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?php echo $productInfo['soluongTon']; ?>">
+                            <button class="qty-btn" type="button" onclick="updateQuantity(1)">+</button>
                         </div>
                         <div class="buttons">
-                            <button class="add-to-cart"><i class="fa fa-shopping-cart"></i><br>Thêm vào giỏ</button>
-                            <button class="buy-now"><a href="buy_now.php" style="text-decoration: none; color: white;">⚡ Mua ngay</a></button>
+                            <input type="hidden" name="product_id" value="<?php echo $productInfo['maSanPham']; ?>">
+                            <button class="add-to-cart" type="button" id="addToCartBtn">Thêm vào giỏ</button>
+                            <button class="buy-now"><a href="buy_now.php" style="text-decoration: none; color: white;">Mua ngay</a></button>
                         </div>
                     </form>
                 </div>
@@ -464,6 +490,86 @@ if (isset($_POST['submit_review'])) {
         if (totalReviews <= 3) {
             btn.style.display = "none";
         }
+
+        document.querySelector("#addToCartBtn").addEventListener("click", function(e) {
+            e.preventDefault();
+            const quantity = document.querySelector("#quantity").value;
+            const productId = document.querySelector('input[name="product_id"]').value;
+            const maxQuantity = <?php echo $productInfo['soluongTon']; ?>;
+
+            // Kiểm tra số lượng hợp lệ tại client
+            if (!quantity || parseInt(quantity) <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Số lượng không hợp lệ!',
+                    text: 'Vui lòng nhập số lượng lớn hơn 0.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            if (parseInt(quantity) > maxQuantity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Số lượng vượt quá!',
+                    text: `Số lượng tối đa có thể chọn là ${maxQuantity}.`,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            // Gửi yêu cầu thêm vào giỏ hàng
+            fetch('details.php?id=<?php echo $productInfo['maSanPham']; ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `add_to_cart=1&quantity=${quantity}&product_id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: data.message,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Xem giỏ hàng',
+                        showCancelButton: true,
+                        cancelButtonText: 'Tiếp tục mua sắm'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'cart.php';
+                        }
+                    });
+                } else if (data.message.includes('Vui lòng đăng nhập')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: data.message,
+                        confirmButtonText: 'Đăng nhập'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'login.php';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi thêm vào giỏ hàng!',
+                    confirmButtonText: 'OK'
+                });
+            });
+        });
     </script>
 </body>
 </html>

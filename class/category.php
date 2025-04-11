@@ -29,7 +29,7 @@
         }
 
         public function show(){
-            $query = "SELECT * FROM tbl_loaisp"; 
+            $query = "SELECT * FROM tbl_loaisp";
             return $this->db->select($query);
         }
 

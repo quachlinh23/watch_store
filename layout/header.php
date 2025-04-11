@@ -66,8 +66,9 @@ Session::init();
 	$fm = new format();
 	$cat = new Category();
 	$pr = new product();
-	$car = new cart();
+	$cart = new cart();
 	$cus = new customerlogin();
+    $userId = $_SESSION['customer_id'] ?? null;
 
 	// if (isset($_GET['logout'])) {
 	// 	Session::set('customer_login', false);
@@ -78,7 +79,7 @@ Session::init();
     if (isset($_GET['logout'])) {
         Session::set('customer_login', false);
         $current_page = basename($_SERVER['PHP_SELF']);
-        if ($current_page === 'profile.php' || $current_page === 'order.php' 
+        if ($current_page === 'profile.php' || $current_page === 'order.php' || $current_page === 'cart.php'
         || $current_page === 'details.php' || $current_page === 'productbybrand.php') {
             header("Location: index.php");
         }else {
@@ -165,11 +166,15 @@ Session::init();
                     $link = "";
                     if ($check){
                         $link = "cart.php";
+                        $idgiohang = $cart->getcartidbycustomer($userId);
+                        $soluong = $cart->countProductCartByUser($idgiohang);
+                    }else{
+                        $soluong = 0;
                     }
                 ?>
                 <a href="<?php echo $link; ?>" id="cart-link" title="Xem Giỏ Hàng" rel="nofollow">
                     <i class="fa fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
+                    <?php echo ($soluong > 0) ? '<span class="cart-count">' . $soluong . '</span>' : ''; ?>
                 </a>
                 <script>
                     document.getElementById('cart-link').addEventListener('click', function(event) {

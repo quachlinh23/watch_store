@@ -143,5 +143,28 @@ class Page_user {
         
             return $products; // Trả về dạng mảng
         }
+
+        public function loadNewProduct() {
+            $query = "SELECT sp.maSanPham, sp.tenSanPham, sp.moTa, sp.hinhAnh, sp.id_thuonghieu,
+                            ctsp.giaBan AS giaBanSP, ctsp.soluongTon, pn.ngayLap
+                    FROM tbl_sanpham sp
+                    JOIN tbl_chitietsanpham ctsp ON sp.maSanPham = ctsp.maSanPham
+                    JOIN tbl_chitietphieunhap ctpn ON ctsp.mact = ctpn.mactSP
+                    JOIN tbl_phieunhap pn ON ctpn.maPN = pn.maPhieuNhap
+                    WHERE ctsp.soluongTon > 0
+                    ORDER BY pn.ngayLap DESC
+                    LIMIT 5";
+        
+            $result_new = $this->db->select($query);
+        
+            $products_new = [];
+            if ($result_new  && $result_new ->num_rows > 0) {
+                while ($row = $result_new ->fetch_assoc()) {
+                    $products_new[] = $row;
+                }
+            }
+        
+            return $products_new;
+        }
     }
 ?>

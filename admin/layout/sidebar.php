@@ -8,13 +8,13 @@
 <nav class="sidebar">
     <ul>
         <!-- Bảng điều khiển luôn hiển thị -->
-        <li onclick="showPage('test.php', this)">📊 Bảng điều khiển</li>
-        <?php 
+        <li onclick="showPage('dash.php', this)">📊 Bảng điều khiển</li>
+        <?php
             if (hasPermission($quyen, 1))
                 echo '<li onclick="showPage(\'employee_manage.php\', this)"><i class="fa-solid fa-user-tie"></i> Nhân viên</li>';
             if (hasPermission($quyen, 2))
                 echo '<li onclick="showPage(\'customer_manage.php\', this)"><i class="fa-solid fa-users"></i> Khách hàng</li>';
-            if (hasPermission($quyen, 3)) 
+            if (hasPermission($quyen, 3))
                 echo '<li onclick="showPage(\'brand_manage.php\', this)"><i class="fa-solid fa-tags"></i> Thương hiệu</li>';
 
             if (hasPermission($quyen, 4))
