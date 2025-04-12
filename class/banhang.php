@@ -6,11 +6,13 @@ class banhang {
     private $db;
     private $fm;
 
+    //Khởi tạo
     public function __construct() {
         $this->db = new Database();
         $this->fm = new Format();
     }
 
+    //Load chi tiết của một đơn hàng
     public function loadInvoiceOfUser($idUser) {
         $idUser = mysqli_real_escape_string($this->db->link, $idUser);
     
@@ -93,6 +95,7 @@ class banhang {
         return $invoices;
     }
 
+    //Load danh sách các đơn hàng
     public function loadAllInvoices() {
         // Truy vấn JOIN 6 bảng để lấy tất cả các phiếu xuất
         $query = "SELECT px.maphieuxuat, px.maTaiKhoan, px.ngayLap, px.tongTien,
@@ -170,6 +173,7 @@ class banhang {
         return $invoices;
     }
 
+    //Xác nhận đơn hàng cho khách hàng
     public function approveInvoice($idInvoice, $idUser) {
         $idInvoice = mysqli_real_escape_string($this->db->link, $idInvoice);
         $idUser = mysqli_real_escape_string($this->db->link, $idUser);
@@ -181,6 +185,84 @@ class banhang {
             return true;
         } else {
             return false;
+        }
+    }
+
+    //Xác nhận trả hàng cho khách hàng
+    public function approveReturn($maPX, $nguoiduyet) {
+        if (empty($maPX)) {
+            return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
+        }
+    
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Kiểm tra hóa đơn tồn tại và trạng thái
+            $stmt = $this->db->link->prepare("SELECT trangThai FROM tbl_phieuxuat WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $order = $result->fetch_assoc();
+    
+            if (!$order) {
+                throw new Exception("Hóa đơn không tồn tại.");
+            }
+    
+            if ($order['trangThai'] != 4) {
+                throw new Exception("Hóa đơn không ở trạng thái yêu cầu trả hàng.");
+            }
+    
+            // Cập nhật trạng thái hóa đơn thành 5 (đồng ý trả hàng)
+            $stmt = $this->db->link->prepare(
+                "UPDATE tbl_phieuxuat SET trangThai = 2, nguoiDuyet = ? WHERE maphieuxuat = ?"
+            );
+            $stmt->bind_param("ii", $nguoiduyet, $maPX);
+            $stmt->execute();
+    
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("Không thể cập nhật trạng thái hóa đơn.");
+            }
+    
+            // Lấy chi tiết hóa đơn để hoàn tồn kho
+            $stmt = $this->db->link->prepare(
+                "SELECT mactSP, soLuongXuat
+                FROM tbl_chitietphieuxuat
+                WHERE maPX = ?"
+            );
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $items = $result->fetch_all(MYSQLI_ASSOC);
+    
+            if (empty($items)) {
+                throw new Exception("Không tìm thấy chi tiết hóa đơn.");
+            }
+    
+            // Hoàn lại số lượng tồn kho
+            $stmt = $this->db->link->prepare(
+                "UPDATE tbl_chitietsanpham
+                SET soluongTon = soluongTon + ?
+                WHERE mact = ?"
+            );
+    
+            foreach ($items as $item) {
+                $soLuongXuat = (int)$item['soLuongXuat'];
+                $mact = (int)$item['mactSP'];
+    
+                $stmt->bind_param("ii", $soLuongXuat, $mact);
+                $stmt->execute();
+    
+                if ($stmt->affected_rows === 0) {
+                    throw new Exception("Không thể cập nhật tồn kho cho mactSP: $mact.");
+                }
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Đồng ý trả hàng thành công', 'phieuxuat_id' => $maPX];
+    
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 }

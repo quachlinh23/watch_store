@@ -50,8 +50,8 @@ class dashboard {
     // Hàm lấy số đơn hàng theo tháng trong một năm
     public function getMonthlyOrders($year) {
         $query = "SELECT MONTH(ngayLap) as month, COUNT(*) as total
-                FROM tbl_phieuxuat 
-                WHERE YEAR(ngayLap) = '$year'
+                FROM tbl_phieuxuat
+                WHERE YEAR(ngayLap) = '$year' AND trangThai = 3
                 GROUP BY MONTH(ngayLap)
                 ORDER BY MONTH(ngayLap)";
         
@@ -67,10 +67,21 @@ class dashboard {
         
         return $monthlyOrders;
     }
+
+    //Hàm lấy số đơn hàng chưa được duyệt
+    public function getOrdersnotapproved() {
+        $query = "SELECT COUNT(*) as total FROM tbl_phieuxuat WHERE trangThai = 0 OR trangThai = 4";
+        $result = $this->db->select($query);
+        if ($result) {
+            $row = $result->fetch_assoc();
+            return (int)$row['total'];
+        }
+        return 0;
+    }
     
     // Hàm lấy tổng số phiếu xuất
     public function getTotalExportBills() {
-        $query = "SELECT COUNT(*) as total FROM tbl_phieuxuat";
+        $query = "SELECT COUNT(*) as total FROM tbl_phieuxuat WHERE trangThai = 3";
         $result = $this->db->select($query);
         
         if ($result) {
@@ -83,13 +94,13 @@ class dashboard {
     // Hàm lấy doanh thu từ tbl_phieuxuat theo tháng và năm
     public function getRevenueStats($type = 'month') {
         $query = $type === 'year' ?
-            "SELECT YEAR(ngayLap) as period, SUM(tongTien) as revenue 
-            FROM tbl_phieuxuat 
-            GROUP BY YEAR(ngayLap) 
+            "SELECT YEAR(ngayLap) as period, SUM(tongTien) as revenue
+            FROM tbl_phieuxuat
+            GROUP BY YEAR(ngayLap)
             ORDER BY period" :
-            "SELECT DATE_FORMAT(ngayLap, '%Y-%m') as period, SUM(tongTien) as revenue 
-            FROM tbl_phieuxuat 
-            GROUP BY DATE_FORMAT(ngayLap, '%Y-%m') 
+            "SELECT DATE_FORMAT(ngayLap, '%Y-%m') as period, SUM(tongTien) as revenue
+            FROM tbl_phieuxuat
+            GROUP BY DATE_FORMAT(ngayLap, '%Y-%m')
             ORDER BY period";
         
         $result = $this->db->select($query);
@@ -109,18 +120,18 @@ class dashboard {
         $query = $type === 'year' ?
             "SELECT YEAR(px.ngayLap) as period, 
                     SUM(px.tongTien - (ctsp.giaBan * ctpx.soLuongXuat)) as profit
-             FROM tbl_phieuxuat px
-             JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
-             JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
-             GROUP BY YEAR(px.ngayLap)
-             ORDER BY period" :
+            FROM tbl_phieuxuat px
+            JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
+            JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
+            GROUP BY YEAR(px.ngayLap)
+            ORDER BY period" :
             "SELECT DATE_FORMAT(px.ngayLap, '%Y-%m') as period, 
                     SUM(px.tongTien - (ctsp.giaBan * ctpx.soLuongXuat)) as profit
-             FROM tbl_phieuxuat px
-             JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
-             JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
-             GROUP BY DATE_FORMAT(px.ngayLap, '%Y-%m')
-             ORDER BY period";
+            FROM tbl_phieuxuat px
+            JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
+            JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
+            GROUP BY DATE_FORMAT(px.ngayLap, '%Y-%m')
+            ORDER BY period";
         
         $result = $this->db->select($query);
         $data = ['labels' => [], 'values' => []];
@@ -133,5 +144,50 @@ class dashboard {
         }
         return $data;
     }
+
+
+    public function getProfitStat($type = 'month', $year = null) {
+        if ($type === 'year') {
+            $query = "
+                SELECT YEAR(px.ngayLap) AS period, 
+                       SUM(px.tongTien - (ctsp.giaBan * ctpx.soLuongXuat)) AS profit
+                FROM tbl_phieuxuat px
+                JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
+                JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
+                WHERE px.trangThai = 3
+                GROUP BY YEAR(px.ngayLap)
+                ORDER BY period
+            ";
+        } else {
+            // Nếu chưa truyền năm thì mặc định lấy năm hiện tại
+            if ($year === null) {
+                $year = date('Y');
+            }
+    
+            $query = "
+                SELECT DATE_FORMAT(px.ngayLap, '%Y-%m') AS period, 
+                       SUM(px.tongTien - (ctsp.giaBan * ctpx.soLuongXuat)) AS profit
+                FROM tbl_phieuxuat px
+                JOIN tbl_chitietphieuxuat ctpx ON px.maPhieuXuat = ctpx.maPX
+                JOIN tbl_chitietsanpham ctsp ON ctpx.maCTSP = ctsp.mact
+                WHERE px.trangThai = 3 AND YEAR(px.ngayLap) = {$year}
+                GROUP BY DATE_FORMAT(px.ngayLap, '%Y-%m')
+                ORDER BY period
+            ";
+        }
+    
+        $result = $this->db->select($query);
+        $data = ['labels' => [], 'values' => []];
+    
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data['labels'][] = $row['period'];
+                $data['values'][] = (float)$row['profit'];
+            }
+        }
+    
+        return $data;
+    }
+
 }
 ?>

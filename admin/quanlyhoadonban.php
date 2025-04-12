@@ -1,4 +1,4 @@
-<?php 
+<?php
 include '../class/banhang.php';
 include '../lib/session.php';
 Session::checkSession();
@@ -6,13 +6,30 @@ Session::checkSession();
 $idnguoiduyet = Session::get('idAcount');
 $banhang = new banhang();
 
-if (isset($_POST['approve_invoice']) && isset($_POST['invoice_id'])) {
-    $invoice_id = intval($_POST['invoice_id']);
-    $result = $banhang->approveInvoice($invoice_id,$idnguoiduyet);
-    echo json_encode(['success' => $result]);
+if (isset($_POST['action']) && in_array($_POST['action'], ['approve_invoice', 'approve_return'])) {
+    header('Content-Type: application/json');
+    $invoice_id = isset($_POST['invoice_id']) ? (int)$_POST['invoice_id'] : 0;
+
+    if ($invoice_id <= 0 || empty($idnguoiduyet)) {
+        echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+        exit;
+    }
+
+    try {
+        if ($_POST['action'] === 'approve_invoice') {
+            $result = $banhang->approveInvoice($invoice_id, $idnguoiduyet);
+            echo json_encode(['success' => $result, 'message' => $result ? 'Duyệt đơn thành công' : 'Lỗi khi duyệt đơn']);
+        } elseif ($_POST['action'] === 'approve_return') {
+            $result = $banhang->approveReturn($invoice_id, $idnguoiduyet);
+            echo json_encode(['success' => $result, 'message' => $result ? 'Đồng ý trả hàng thành công' : $result['message'] ?? 'Lỗi khi đồng ý trả hàng']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Hành động không hợp lệ']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Lỗi server: ' . $e->getMessage()]);
+    }
     exit;
 }
-
 
 // Get filter parameter
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
@@ -50,15 +67,15 @@ foreach ($invoices as $invoice) {
 <div class="container">
     <h2>Quản lý đơn hàng</h2>
     <div class="search-container" style="margin-top: 30px; margin-bottom: 25px;">
-            <form method="get">
-                <select name="filter">
-                    <option value="all" <?= ($filter == 'all') ? 'selected' : ''; ?>>Tất cả</option>
-                    <option value="supported" <?= ($filter == 'supported') ? 'selected' : ''; ?>>Đã duyệt</option>
-                    <option value="pending" <?= ($filter == 'pending') ? 'selected' : ''; ?>>Chưa duyệt</option>
-                </select>
-                <button type="submit" name="Search"><i class="fa fa-filter"></i> Lọc</button>
-            </form>
-        </div>
+        <form method="get">
+            <select name="filter">
+                <option value="all" <?= ($filter == 'all') ? 'selected' : ''; ?>>Tất cả</option>
+                <option value="supported" <?= ($filter == 'supported') ? 'selected' : ''; ?>>Đã duyệt</option>
+                <option value="pending" <?= ($filter == 'pending') ? 'selected' : ''; ?>>Chưa duyệt</option>
+            </select>
+            <button type="submit" name="Search"><i class="fa fa-filter"></i> Lọc</button>
+        </form>
+    </div>
     <div class="table-container">
         <table class="table_slider">
             <thead>
@@ -82,7 +99,19 @@ foreach ($invoices as $invoice) {
                             <td><?= $index + 1; ?></td>
                             <td><?= htmlspecialchars($invoice['customer']['tenKhachHang']); ?></td>
                             <td><?= htmlspecialchars($invoice['customer']['soDT']); ?></td>
-                            <td><?= $invoice['trangThai'] == 1 ? 'Đã duyệt' : 'Chưa duyệt'; ?></td>
+                            <td>
+                                <?php
+                                switch ($invoice['trangThai']) {
+                                    case 0: echo 'Đang xử lý'; break;
+                                    case 1: echo 'Đã duyệt'; break;
+                                    case 2: echo 'Đã hủy'; break;
+                                    case 3: echo 'Đã nhận được hàng'; break;
+                                    case 4: echo 'Yêu cầu trả hàng'; break;
+                                    case 5: echo 'Đã đồng ý trả hàng'; break;
+                                    default: echo 'Không xác định';
+                                }
+                                ?>
+                            </td>
                             <td><?= number_format($invoice['tongTien'], 0, ',', '.') . ' VNĐ'; ?></td>
                             <td class="btn-container">
                                 <button style="background-color: #4caf50; color: white; font-weight: bold;" title="Xem chi tiết" class="btn-action btn-detail" onclick='showDetail(<?= json_encode($invoice); ?>)'>
@@ -91,6 +120,10 @@ foreach ($invoices as $invoice) {
                                 <?php if ($invoice['trangThai'] == 0): ?>
                                     <button style="background-color: #ff0000; color: white; font-weight: bold;" class="btn-action btn-approve" data-invoice-id="<?= $invoice['maphieuxuat']; ?>">
                                         <i style="padding-right: 5px;" class="fa-solid fa-check-to-slot"></i> Duyệt đơn
+                                    </button>
+                                <?php elseif ($invoice['trangThai'] == 4): ?>
+                                    <button style="background-color: #ff0000; color: white; font-weight: bold;" class="btn-action btn-return" data-invoice-id="<?= $invoice['maphieuxuat']; ?>">
+                                        <i style="padding-right: 5px;" class="fa-solid fa-check-to-slot"></i> Đồng ý trả hàng
                                     </button>
                                 <?php endif; ?>
                             </td>
@@ -170,17 +203,21 @@ foreach ($invoices as $invoice) {
 
 <script>
     function showDetail(invoice) {
-        // Điền thông tin cơ bản
         document.getElementById('invoiceCode').textContent = invoice.maphieuxuat;
         document.getElementById('customerName').textContent = invoice.customer.tenKhachHang;
         document.getElementById('customerPhone').textContent = invoice.customer.soDT;
         document.getElementById('customerAddress').textContent = invoice.customer.diaChi;
-        document.getElementById('orderStatus').textContent = invoice.trangThai == 1 ? 'Đã duyệt' : 'Chưa duyệt';
+        document.getElementById('orderStatus').textContent =
+            invoice.trangThai === 0 ? 'Đang xử lý' :
+            invoice.trangThai === 1 ? 'Đã duyệt' :
+            invoice.trangThai === 2 ? 'Đã hủy' :
+            invoice.trangThai === 3 ? 'Đã nhận được hàng' :
+            invoice.trangThai === 4 ? 'Yêu cầu trả hàng' :
+            invoice.trangThai === 5 ? 'Đã đồng ý trả hàng' : 'Không xác định';
         document.getElementById('totalAmount').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(invoice.tongTien);
 
-        // Điền danh sách sản phẩm
         const productTableBody = document.getElementById('productListBody');
-        productTableBody.innerHTML = ''; // Xóa dữ liệu cũ
+        productTableBody.innerHTML = '';
 
         invoice.items.forEach((product, index) => {
             const total = product.soLuongXuat * product.giaban;
@@ -195,7 +232,6 @@ foreach ($invoices as $invoice) {
             productTableBody.innerHTML += row;
         });
 
-        // Hiển thị modal
         document.getElementById('invoiceDetailModal').style.display = 'block';
     }
 
@@ -203,30 +239,65 @@ foreach ($invoices as $invoice) {
         document.getElementById('invoiceDetailModal').style.display = 'none';
     }
 
-    // Handle "Duyệt đơn" (Approve Order) button click
+    // Handle "Duyệt đơn"
     document.querySelectorAll('.btn-approve').forEach(button => {
         button.addEventListener('click', function() {
             const invoiceId = this.getAttribute('data-invoice-id');
+            if (!invoiceId || isNaN(invoiceId)) {
+                alert('Mã hóa đơn không hợp lệ');
+                return;
+            }
             if (confirm('Bạn có chắc chắn muốn duyệt đơn hàng này?')) {
                 fetch('', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `approve_invoice=true&invoice_id=${invoiceId}`
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=approve_invoice&invoice_id=${encodeURIComponent(invoiceId)}`
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
+                    alert(data.message);
                     if (data.success) {
-                        alert('Đơn hàng đã được duyệt thành công!');
-                        location.reload(); // Reload the page to reflect the updated status
-                    } else {
-                        alert('Có lỗi xảy ra khi duyệt đơn hàng.');
+                        location.reload();
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi duyệt đơn hàng.');
+                    console.error('Error approving invoice:', error);
+                    alert('Có lỗi xảy ra khi duyệt đơn hàng: ' + error.message);
+                });
+            }
+        });
+    });
+
+    // Handle "Đồng ý trả hàng"
+    document.querySelectorAll('.btn-return').forEach(button => {
+        button.addEventListener('click', function() {
+            const invoiceId = this.getAttribute('data-invoice-id');
+            if (!invoiceId || isNaN(invoiceId)) {
+                alert('Mã hóa đơn không hợp lệ');
+                return;
+            }
+            if (confirm('Bạn có chắc chắn muốn đồng ý trả hàng cho đơn hàng này?')) {
+                fetch('', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=approve_return&invoice_id=${encodeURIComponent(invoiceId)}`
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error approving return:', error);
+                    alert('Có lỗi xảy ra khi đồng ý trả hàng: ' + error.message);
                 });
             }
         });

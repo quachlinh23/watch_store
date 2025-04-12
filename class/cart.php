@@ -398,7 +398,7 @@ class cart {
         LEFT JOIN tbl_khachhang kh ON px.maTaiKhoan = kh.id_taikhoan
         LEFT JOIN tbl_chitietsanpham cts ON ct.mactSP = cts.mact
         LEFT JOIN tbl_sanpham sp ON cts.masanpham = sp.maSanPham
-        WHERE px.maTaiKhoan = 3
+        WHERE px.maTaiKhoan = $idUser
         ORDER BY px.ngayLap
         DESC, ct.mactPX
         ASC";
@@ -463,6 +463,160 @@ class cart {
         }
     
         return $invoices;
+    }
+
+    public function cancelOrder($maPX) {
+        if (empty($maPX)) {
+            return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
+        }
+    
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Kiểm tra hóa đơn tồn tại và trạng thái
+            $stmt = $this->db->link->prepare("SELECT trangThai FROM tbl_phieuxuat WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $order = $result->fetch_assoc();
+    
+            if (!$order) {
+                throw new Exception("Hóa đơn không tồn tại.");
+            }
+    
+            if ($order['trangThai'] == 2) {
+                throw new Exception("Hóa đơn đã bị hủy trước đó.");
+            }
+    
+            // Cập nhật trạng thái hóa đơn thành 2 (hủy)
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 2 WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+    
+            // Lấy chi tiết hóa đơn để hoàn tồn kho
+            $stmt = $this->db->link->prepare(
+                "SELECT mactSP, soLuongXuat
+                FROM tbl_chitietphieuxuat
+                WHERE maPX = ?"
+            );
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $items = $result->fetch_all(MYSQLI_ASSOC);
+    
+            if (empty($items)) {
+                throw new Exception("Không tìm thấy chi tiết hóa đơn.");
+            }
+    
+            // Hoàn lại số lượng tồn kho
+            $stmt = $this->db->link->prepare(
+                "UPDATE tbl_chitietsanpham
+                SET soluongTon = soluongTon + ?
+                WHERE mact = ?"
+            );
+    
+            foreach ($items as $item) {
+                $soLuongXuat = (int)$item['soLuongXuat'];
+                $mact = (int)$item['mactSP'];
+    
+                $stmt->bind_param("ii", $soLuongXuat, $mact);
+                $stmt->execute();
+    
+                // Kiểm tra xem cập nhật có thành công không
+                if ($stmt->affected_rows === 0) {
+                    throw new Exception("Không thể cập nhật tồn kho cho mactSP: $mact.");
+                }
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Hủy hóa đơn thành công', 'phieuxuat_id' => $maPX];
+    
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function markAsReceived($maPX) {
+        if (empty($maPX)) {
+            return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
+        }
+    
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Kiểm tra hóa đơn
+            $stmt = $this->db->link->prepare("SELECT trangThai FROM tbl_phieuxuat WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $order = $result->fetch_assoc();
+    
+            if (!$order) {
+                throw new Exception("Hóa đơn không tồn tại.");
+            }
+    
+            if ($order['trangThai'] != 1) {
+                throw new Exception("Hóa đơn không ở trạng thái đã duyệt.");
+            }
+    
+            // Cập nhật trạng thái thành Đã nhận hàng (3)
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 3 WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+    
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("Không thể cập nhật trạng thái hóa đơn.");
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Xác nhận nhận hàng thành công'];
+    
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function requestReturn($maPX) {
+        if (empty($maPX)) {
+            return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
+        }
+    
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Kiểm tra hóa đơn
+            $stmt = $this->db->link->prepare("SELECT trangThai FROM tbl_phieuxuat WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $order = $result->fetch_assoc();
+    
+            if (!$order) {
+                throw new Exception("Hóa đơn không tồn tại.");
+            }
+    
+            if ($order['trangThai'] != 3) {
+                throw new Exception("Hóa đơn không ở trạng thái đã nhận hàng.");
+            }
+    
+            // Cập nhật trạng thái thành Yêu cầu trả hàng (4)
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 4 WHERE maphieuxuat = ?");
+            $stmt->bind_param("i", $maPX);
+            $stmt->execute();
+    
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("Không thể cập nhật trạng thái hóa đơn.");
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Yêu cầu trả hàng đã được gửi'];
+    
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 }
 ?>
