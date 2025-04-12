@@ -94,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['CONTENT_TYPE']) && 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COWatch Store</title>
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/nhaphang.css">

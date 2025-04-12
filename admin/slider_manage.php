@@ -21,7 +21,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Slider</title>
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/search.css">

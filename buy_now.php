@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once "class/customerlogin.php";
+include_once "class/cart.php";
 
 $loggedIn = isset($_SESSION['customer_id']);
 $customerInfo = null;
@@ -109,101 +110,36 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
             </div>
         </div>
 
-        <!-- Danh sách sản phẩm (dữ liệu tĩnh) -->
-        <div class="product-list">
-            <div class="product-item">
-                <div class="product-item-info">
-                    <div class="product-item__left">
-                        <img class="proImg" src="images/cart.png" alt="Sản phẩm">
-                    </div>
-                    <div class="product-item__right">
-                        <div class="product-item__details">
-                            <div class="product-item__name">Tên sản phẩm</div>
-                            <div class="product-item__limit">Còn lại: 10</div>
-                            <div class="product-item__quanty">SL: 1</div>
-                        </div>
-                        <div class="product-item__price">100.000đ</div>
-                    </div>
-                </div>
-                <div class="product-item-info-quanty">
-                    <div class="info-quanty">
-                        <span>Số lượng:</span>
-                        <button class="btn-minus">-</button>
-                        <input type="number" class="product-quantity" value="1" min="1">
-                        <button class="btn-plus">+</button>
-                    </div>
-                </div>
-                <hr class="boderHr">
-                <div class="total-provisional">
-                    <span class="total-product-quantity">
-                        <span class="total-label">Tạm tính </span>(1 sản phẩm):
-                    </span>
-                    <span class="temp-total-money">
-                        <span class="temp-total-money-data">495.000đ</span>
-                    </span>
-                </div>
-                <div class="discount">
-                    <span class="total-product-quantity">
-                        <span class="total-label">Miễn giảm:</span>
-                    </span>
-                    <span class="temp-total-money">
-                        <span class="temp-total-money-data">0</span>
-                    </span>
-                </div>
-                <div class="totalmoney">
-                    <span class="total-product-quantity">
-                        <span class="total-label">Cần thanh toán:</span>
-                    </span>
-                    <span class="temp-total-money">
-                        <span class="temp-total-money-data">495.000đ</span>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hình thức thanh toán -->
-        <div class="payment-method">
-            <h3>Hình thức thanh toán</h3>
-            <label>
-                <input type="radio" name="payment" value="cod" checked> Thanh toán khi nhận hàng
-            </label><br>
-            <label>
-                <input type="radio" name="payment" value="bank"> Chuyển khoản ngân hàng
-            </label><br>
-            <label>
-                <input type="radio" name="payment" value="wallet"> Ví điện tử (Momo, ZaloPay)
-            </label>
+        <!-- Danh sách sản phẩm -->
+        <div class="product-list" id="product-list">
+            <!-- Sản phẩm sẽ được thêm động bằng JavaScript -->
         </div>
 
         <!-- Nút Thanh toán / Hủy -->
         <div class="payment-actions">
             <button class="btn-cancel" onclick="window.location.href='index.php'">Hủy đơn</button>
-            <button class="btn-pay" onclick="checkout()">Thanh toán</button>
+            <button class="btn-pay" onclick="checkout()">Thanh Toán</button>
         </div>
     </div>
 
     <script>
-        // Kiểm tra trạng thái đăng nhập
         const isLoggedIn = <?php echo $loggedIn ? 'true' : 'false'; ?>;
 
-        // Mở modal và khóa cuộn
         function openAddressModal() {
             if (!isLoggedIn) {
                 alert('Vui lòng đăng nhập để mua hàng!');
-                window.location.href = 'login.php'; // Chuyển hướng đến trang đăng nhập
+                window.location.href = 'login.php';
                 return;
             }
             document.getElementById("addressModal").style.display = "block";
             document.body.classList.add('no-scroll');
         }
 
-        // Đóng modal và mở lại cuộn
         function closeAddressModal() {
             document.getElementById("addressModal").style.display = "none";
             document.body.classList.remove('no-scroll');
         }
 
-        // Đóng modal khi nhấn ra ngoài và mở lại cuộn
         window.onclick = function(event) {
             const modal = document.getElementById("addressModal");
             if (event.target == modal) {
@@ -212,24 +148,120 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
             }
         }
 
-        // Xử lý thanh toán
-        function checkout() {
-            if (!isLoggedIn) {
-                alert('Vui lòng đăng nhập để mua hàng!');
-                window.location.href = 'login.php'; // Chuyển hướng đến trang đăng nhập
+        document.addEventListener("DOMContentLoaded", function () {
+            const productList = document.getElementById("product-list");
+            const checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
+
+            if (checkoutItems.length === 0) {
+                productList.innerHTML = '<p style="text-align: center;">Không có sản phẩm nào được chọn.</p>';
+                document.querySelector(".btn-pay").disabled = true;
                 return;
             }
 
-            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+            let total = 0;
+            checkoutItems.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                const productItem = document.createElement("div");
+                productItem.className = "product-item";
+                productItem.innerHTML = `
+                    <div class="product-item-info">
+                        <div class="product-item__left">
+                            <img class="proImg" src="${item.image}" alt="${item.name}">
+                        </div>
+                        <div class="product-item__right">
+                            <div class="product-item__details">
+                                <div class="product-item__name">${item.name}</div>
+                                <div class="product-item__limit">Còn lại: ${item.stock}</div>
+                                <div class="product-item__quanty">SL: ${item.quantity}</div>
+                            </div>
+                            <div class="product-item__price">${item.price.toLocaleString("vi-VN")}đ</div>
+                        </div>
+                    </div>
+                    <hr class="boderHr">
+                `;
+                productList.appendChild(productItem);
+            });
+
+            const totalDiv = document.createElement("div");
+            totalDiv.className = "totalmoney";
+            totalDiv.innerHTML = `
+                <span class="total-product-quantity">
+                    <span class="total-label">Cần thanh toán:</span>
+                </span>
+                <span class="temp-total-money">
+                    <span class="temp-total-money-data">${total.toLocaleString("vi-VN")}đ</span>
+                </span>
+            `;
+            productList.appendChild(totalDiv);
+        });
+
+        function checkout() {
+            if (!isLoggedIn) {
+                alert('Vui lòng đăng nhập để mua hàng!');
+                window.location.href = 'login.php';
+                return;
+            }
+
             if (!<?php echo isset($_SESSION['shipping_info']) ? 'true' : 'false'; ?>) {
                 alert('Vui lòng nhập thông tin giao hàng trước khi thanh toán!');
                 openAddressModal();
                 return;
             }
 
-            alert('Đặt hàng thành công với phương thức: ' + paymentMethod);
-            window.location.href = 'index.php'; // Chuyển hướng về trang chủ
+            const checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
+            if (checkoutItems.length === 0) {
+                alert('Không có sản phẩm nào để thanh toán!');
+                return;
+            }
+
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "";
+
+            const itemsInput = document.createElement("input");
+            itemsInput.type = "hidden";
+            itemsInput.name = "items";
+            itemsInput.value = JSON.stringify(checkoutItems);
+            form.appendChild(itemsInput);
+
+            const actionInput = document.createElement("input");
+            actionInput.type = "hidden";
+            actionInput.name = "action";
+            actionInput.value = "process_checkout";
+            form.appendChild(actionInput);
+
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
+
+    <?php
+    if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'process_checkout') {
+        $cart = new cart();
+        $maTaiKhoan = $_SESSION['customer_id']; // Lấy maTaiKhoan từ session
+        $items = json_decode($_POST['items'] ?? '[]', true);
+        $shippingInfo = $_SESSION['shipping_info'] ?? null;
+
+        if (empty($items) || empty($shippingInfo)) {
+            echo "<script>alert('Thông tin không đầy đủ'); window.history.back();</script>";
+            exit;
+        }
+
+        $result = $cart->process_checkout($maTaiKhoan, $items, $shippingInfo);
+
+        if ($result['success']) {
+            unset($_SESSION['shipping_info']);
+            echo "<script>
+                sessionStorage.removeItem('checkoutItems');
+                alert('Đặt hàng thành công');
+                window.location.href = 'index.php';
+            </script>";
+        } else {
+            echo "<script>alert('Có lỗi xảy ra: " . htmlspecialchars($result['message']) . "'); window.history.back();</script>";
+        }
+        exit;
+    }
+    ?>
 </body>
 </html>

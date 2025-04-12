@@ -8,7 +8,7 @@
 <nav class="sidebar">
     <ul>
         <!-- Bảng điều khiển luôn hiển thị -->
-        <li onclick="showPage('dash.php', this)">📊 Bảng điều khiển</li>
+        <li onclick="showPage('daboardAdmin.php', this)">📊 Bảng điều khiển</li>
         <?php
             if (hasPermission($quyen, 1))
                 echo '<li onclick="showPage(\'employee_manage.php\', this)"><i class="fa-solid fa-user-tie"></i> Nhân viên</li>';

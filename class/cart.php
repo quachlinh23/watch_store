@@ -255,6 +255,214 @@ class cart {
     
         return 0; // Nếu truy vấn lỗi
     }
+
+    public function process_checkout($maTaiKhoan, $items, $shipping_info) {
+        if (empty($maTaiKhoan) || empty($items) || empty($shipping_info)) {
+            return ['success' => false, 'message' => 'Thông tin không đầy đủ'];
+        }
     
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Tính tổng tiền
+            $total = 0;
+            foreach ($items as $item) {
+                $id_sanpham = (int)$item['idProduct'];
+                $quantity = (int)$item['quantity'];
+                $price = (float)$item['price'];
+    
+                // Kiểm tra tồn kho
+                $stmt = $this->db->link->prepare("SELECT mact, soluongTon FROM tbl_chitietsanpham WHERE masanpham = ?");
+                $stmt->bind_param("i", $id_sanpham);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stock = $result->fetch_assoc();
+    
+                if (!$stock || $stock['soluongTon'] < $quantity) {
+                    throw new Exception("Sản phẩm ID $id_sanpham không đủ số lượng tồn kho.");
+                }
+    
+                $total += $price * $quantity;
+            }
+    
+            // Thêm phiếu xuất vào tbl_phieuxuat
+            $stmt = $this->db->link->prepare(
+                "INSERT INTO tbl_phieuxuat (maTaiKhoan, ngayLap, tongTien, trangThai, nguoiDuyet) 
+                VALUES (?, NOW(), ?, 0, NULL)"
+            );
+            $stmt->bind_param("id", $maTaiKhoan, $total);
+            $stmt->execute();
+            $phieuxuat_id = $this->db->link->insert_id;
+    
+            // Lấy maGioHang từ maTaiKhoan để cập nhật giỏ hàng
+            $id_giohang = $this->getcartidbycustomer($maTaiKhoan);
+    
+            // Thêm chi tiết phiếu xuất và cập nhật các bảng liên quan
+            $stmt_phieuxuat = $this->db->link->prepare(
+                "INSERT INTO tbl_chitietphieuxuat (maPX, mactSP, soLuongXuat) 
+                VALUES (?, ?, ?)"
+            );
+    
+            foreach ($items as $item) {
+                $id_sanpham = (int)$item['idProduct'];
+                $quantity = (int)$item['quantity'];
+                $price = (float)$item['price'];
+    
+                // Lấy mact từ tbl_chitietsanpham
+                $stmt = $this->db->link->prepare("SELECT mact FROM tbl_chitietsanpham WHERE masanpham = ?");
+                $stmt->bind_param("i", $id_sanpham);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $mact = $result->fetch_assoc()['mact'];
+    
+                // Thêm chi tiết phiếu xuất
+                $stmt_phieuxuat->bind_param("iii", $phieuxuat_id, $mact, $quantity);
+                $stmt_phieuxuat->execute();
+    
+                // Cập nhật số lượng tồn kho trong tbl_chitietsanpham
+                $update_stmt = $this->db->link->prepare(
+                    "UPDATE tbl_chitietsanpham SET soluongTon = soluongTon - ? WHERE masanpham = ?"
+                );
+                $update_stmt->bind_param("ii", $quantity, $id_sanpham);
+                $update_stmt->execute();
+    
+                // Cập nhật giỏ hàng (trừ số lượng thay vì xóa hoàn toàn)
+                $this->removecart($id_giohang, $id_sanpham, $quantity);
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Phiếu xuất đã được tạo thành công', 'phieuxuat_id' => $phieuxuat_id];
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function removecart($id_giohang, $id_sanpham, $quantity_to_remove) {
+        // Lấy số lượng hiện tại trong giỏ hàng
+        $stmt = $this->db->link->prepare(
+            "SELECT soLuong, thanhTien FROM tbl_chitietgiohang WHERE maGioHang = ? AND maSanPham = ?"
+        );
+        $stmt->bind_param("ii", $id_giohang, $id_sanpham);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $cart_item = $result->fetch_assoc();
+    
+        if (!$cart_item) {
+            return ["success" => false, "message" => "Sản phẩm không tồn tại trong giỏ hàng"];
+        }
+    
+        $current_quantity = (int)$cart_item['soLuong'];
+        $new_quantity = $current_quantity - $quantity_to_remove;
+    
+        if ($new_quantity <= 0) {
+            // Nếu số lượng còn lại <= 0, xóa bản ghi
+            $delete_stmt = $this->db->link->prepare(
+                "DELETE FROM tbl_chitietgiohang WHERE maGioHang = ? AND maSanPham = ?"
+            );
+            $delete_stmt->bind_param("ii", $id_giohang, $id_sanpham);
+            $delete_stmt->execute();
+        } else {
+            // Nếu còn lại > 0, cập nhật số lượng và thành tiền
+            $unit_price = $cart_item['thanhTien'] / $current_quantity; // Giá đơn vị
+            $new_thanhTien = $unit_price * $new_quantity;
+    
+            $update_stmt = $this->db->link->prepare(
+                "UPDATE tbl_chitietgiohang SET soLuong = ?, thanhTien = ? WHERE maGioHang = ? AND maSanPham = ?"
+            );
+            $update_stmt->bind_param("idii", $new_quantity, $new_thanhTien, $id_giohang, $id_sanpham);
+            $update_stmt->execute();
+        }
+    
+        // Cập nhật tổng tiền giỏ hàng
+        $tongTien = $this->update_cart_total($id_giohang);
+        return [
+            "success" => true,
+            "message" => "Cập nhật giỏ hàng thành công",
+            "tongTien" => $tongTien
+        ];
+    }
+
+    public function loadInvoiceOfUser($idUser) {
+        $idUser = mysqli_real_escape_string($this->db->link, $idUser);
+    
+        // Truy vấn JOIN 6 bảng
+        $query = "SELECT px.maphieuxuat, px.maTaiKhoan, px.ngayLap, px.tongTien,
+        px.trangThai, ct.mactPX, ct.mactSP, ct.soLuongXuat, tk_buyer.id
+        AS buyer_id, kh.id_khachhang, kh.tenKhachHang, kh.diaChi, kh.soDT,
+        kh.email, sp.maSanPham, sp.tenSanPham, sp.hinhAnh, cts.giaban
+        FROM tbl_phieuxuat px
+        LEFT JOIN tbl_chitietphieuxuat ct
+        ON px.maphieuxuat = ct.maPX
+        LEFT JOIN tbl_taikhoan tk_buyer ON px.maTaiKhoan = tk_buyer.id
+        LEFT JOIN tbl_khachhang kh ON px.maTaiKhoan = kh.id_taikhoan
+        LEFT JOIN tbl_chitietsanpham cts ON ct.mactSP = cts.mact
+        LEFT JOIN tbl_sanpham sp ON cts.masanpham = sp.maSanPham
+        WHERE px.maTaiKhoan = 3
+        ORDER BY px.ngayLap
+        DESC, ct.mactPX
+        ASC";
+    
+        $result = $this->db->select($query);
+    
+        if (!$result) {
+            return [];
+        }
+    
+        // Xử lý dữ liệu thành mảng phân cấp
+        $invoices = [];
+        $current_invoice_id = null;
+        $current_invoice = null;
+    
+        while ($row = $result->fetch_assoc()) {
+            $maphieuxuat = (int)$row['maphieuxuat'];
+    
+            // Nếu chuyển sang phiếu xuất mới
+            if ($current_invoice_id !== $maphieuxuat) {
+                if ($current_invoice !== null) {
+                    $invoices[] = $current_invoice;
+                }
+                $current_invoice = [
+                    'maphieuxuat' => $maphieuxuat,
+                    'maTaiKhoan' => (int)$row['maTaiKhoan'],
+                    'ngayLap' => $row['ngayLap'],
+                    'tongTien' => (float)$row['tongTien'],
+                    'trangThai' => (int)$row['trangThai'],
+                    'buyer' => [
+                        'id_taikhoan' => (int)$row['buyer_id'],
+                    ],
+                    'customer' => [
+                        'id_khachhang' => (int)$row['id_khachhang'],
+                        'tenKhachHang' => $row['tenKhachHang'],
+                        'diaChi' => $row['diaChi'],
+                        'soDT' => $row['soDT'],
+                        'email' => $row['email']
+                    ],
+                    'items' => []
+                ];
+                $current_invoice_id = $maphieuxuat;
+            }
+    
+            // Thêm chi tiết sản phẩm nếu có
+            if ($row['mactPX'] !== null) {
+                $current_invoice['items'][] = [
+                    'mactPX' => (int)$row['mactPX'],
+                    'mactSP' => (int)$row['mactSP'],
+                    'soLuongXuat' => (int)$row['soLuongXuat'],
+                    'maSanPham' => (int)$row['maSanPham'],
+                    'tenSanPham' => $row['tenSanPham'],
+                    'hinhAnh' => $row['hinhAnh'],
+                    'giaban' => (float)$row['giaban']
+                ];
+            }
+        }
+    
+        // Thêm phiếu xuất cuối cùng vào mảng
+        if ($current_invoice !== null) {
+            $invoices[] = $current_invoice;
+        }
+    
+        return $invoices;
+    }
 }
 ?>

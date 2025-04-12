@@ -412,5 +412,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             handleItemCheckboxChange();
         });
     </script>
+
+    <script>
+        document.querySelector(".checkout-btn").addEventListener("click", function () {
+            const selectedItems = [];
+            document.querySelectorAll(".select-item:checked").forEach(checkbox => {
+                const row = checkbox.closest("tr");
+                selectedItems.push({
+                    idProduct: row.getAttribute("data-product-id"),
+                    quantity: parseInt(row.querySelector(".quantity").value),
+                    price: parseFloat(row.getAttribute("data-price")),
+                    name: row.querySelector(".product-name").textContent,
+                    image: row.querySelector(".product-img").src,
+                    stock: parseInt(row.getAttribute("data-stock"))
+                });
+            });
+
+            if (selectedItems.length === 0) {
+                alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+                return;
+            }
+
+            // Lưu danh sách sản phẩm vào sessionStorage
+            sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+
+            // Chuyển hướng sang buynow.php
+            window.location.href = "buy_now.php";
+        });
+    </script>
 </body>
 </html>

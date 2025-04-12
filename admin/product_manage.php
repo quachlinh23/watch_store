@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['trangTh
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm</title>
     <link rel="stylesheet" href="css/manage.css">
     <link rel="stylesheet" href="css/model.css">
     <link rel="stylesheet" href="css/product_custom.css">

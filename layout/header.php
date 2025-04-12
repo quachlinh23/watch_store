@@ -118,8 +118,8 @@ Session::init();
                     ?>
                     </div>
                 </li>
-                <li><a href="#">Tin tức</a></li>
-                <li><a href="#">Thương hiệu</a></li>
+                <li><a href="tintuc.php">Tin tức</a></li>
+                <li><a href="infostore.php">Giới thiệu</a></li>
                 <li><a href="contact.php">Hỗ trợ</a></li>
             </ul>
         </nav>

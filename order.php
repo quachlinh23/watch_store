@@ -1,22 +1,39 @@
 <?php
-	include_once "class/brand.php";
-	$brand = new brand();
+session_start();
+include_once "class/brand.php";
+include_once "class/cart.php"; // Đảm bảo đường dẫn đúng tới class cart
+
+$cart = new cart();
+$brand = new brand();
+
+// Lấy danh sách phiếu xuất của người dùng
+$userId = $_SESSION['customer_id'] ?? null; // Giả sử customer_id là maTaiKhoan
+$invoices = $userId ? $cart->loadInvoiceOfUser($userId) : [];
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đơn Đặt Hàng</title>
+    <title>Lịch sử đơn đặt hàng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/order.css">
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">
+    <style>
+        .btn-cancel:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
 </head>
 <body>
 <?php include 'layout/header.php'; ?>
     <div class="cart-container">
-        <h2>Đơn Đặt Hàng</h2>
+        <h2>Lịch Sử Đơn Đặt Hàng</h2>
         <div class="cart-content">
             <table class="cart-table">
                 <thead>
@@ -29,116 +46,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>28/03/2025</td>
-                        <td>1,500,000 VNĐ</td>
-                        <td>Đang xử lý</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(1)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>27/03/2025</td>
-                        <td>2,700,000 VNĐ</td>
-                        <td>Hoàn thành</td>
-                        <td class="action-buttons">
-                            <button class="btn-view" onclick="showInvoiceDetails(2)">Xem chi tiết</button>
-                            <button class="btn-cancel">Hủy đơn</button>
-                        </td>
-                    </tr>
+                    <?php if (empty($invoices)): ?>
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Bạn chưa có đơn đặt hàng nào.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($invoices as $index => $invoice): ?>
+                            <tr>
+                                <td><?php echo $index + 1; ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($invoice['ngayLap'])); ?></td>
+                                <td><?php echo number_format($invoice['tongTien'], 0, ',', '.') . ' VNĐ'; ?></td>
+                                <td><?php echo $invoice['trangThai'] == 0 ? 'Đang xử lý' : 'Đã Duyệt'; ?></td>
+                                <td class="action-buttons">
+                                    <button class="btn-view" onclick='showInvoiceDetails(<?php echo json_encode($invoice); ?>)'>Xem chi tiết</button>
+                                    <button class="btn-cancel" <?php echo $invoice['trangThai'] != 0 ? 'disabled' : ''; ?>>Hủy đơn</button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -172,8 +97,8 @@
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Mã sản phẩm</th>
                                     <th>Tên sản phẩm</th>
+                                    <th>Hình ảnh</th>
                                     <th>Số lượng</th>
                                     <th>Đơn giá</th>
                                     <th>Thành tiền</th>
@@ -193,68 +118,32 @@
     </div>
 
     <script>
-        // Dữ liệu mẫu (có thể thay bằng dữ liệu từ database)
-        const invoiceData = {
-            1: {
-                invoiceCode: "HD001",
-                customerName: "Nguyễn Văn A",
-                customerPhone: "0901234567",
-                customerAddress: "123 Đường Láng, Hà Nội",
-                orderStatus: "Đang xử lý",
-                products: [
-                    { id: "SP001", name: "Áo thun", quantity: 2, price: "200,000 VNĐ", total: "400,000 VNĐ" },
-                    { id: "SP002", name: "Quần jeans", quantity: 1, price: "500,000 VNĐ", total: "500,000 VNĐ" },
-                    { id: "SP003", name: "Giày thể thao", quantity: 1, price: "300,000 VNĐ", total: "300,000 VNĐ" },
-                    { id: "SP004", name: "Mũ lưỡi trai", quantity: 1, price: "100,000 VNĐ", total: "100,000 VNĐ" },
-                    { id: "SP005", name: "Túi xách", quantity: 1, price: "200,000 VNĐ", total: "200,000 VNĐ" }
-                ],
-                totalAmount: "1,500,000 VNĐ"
-            },
-            2: {
-                invoiceCode: "HD002",
-                customerName: "Trần Thị B",
-                customerPhone: "0912345678",
-                customerAddress: "456 Nguyễn Trãi, TP.HCM",
-                orderStatus: "Hoàn thành",
-                products: [
-                    { id: "SP003", name: "Giày thể thao", quantity: 1, price: "1,000,000 VNĐ", total: "1,000,000 VNĐ" },
-                    { id: "SP004", name: "Túi xách", quantity: 1, price: "800,000 VNĐ", total: "800,000 VNĐ" },
-                    { id: "SP005", name: "Áo khoác", quantity: 1, price: "400,000 VNĐ", total: "400,000 VNĐ" },
-                    { id: "SP006", name: "Kính râm", quantity: 2, price: "150,000 VNĐ", total: "300,000 VNĐ" },
-                    { id: "SP007", name: "Dép sandal", quantity: 1, price: "200,000 VNĐ", total: "200,000 VNĐ" }
-                ],
-                totalAmount: "2,700,000 VNĐ"
-            }
-        };
-
         // Hàm hiển thị modal chi tiết hóa đơn
-        function showInvoiceDetails(invoiceId) {
-            const data = invoiceData[invoiceId];
-            if (data) {
-                document.getElementById("invoiceCode").textContent = data.invoiceCode;
-                document.getElementById("customerName").textContent = data.customerName;
-                document.getElementById("customerPhone").textContent = data.customerPhone;
-                document.getElementById("customerAddress").textContent = data.customerAddress;
-                document.getElementById("orderStatus").textContent = data.orderStatus;
-                document.getElementById("totalAmount").textContent = data.totalAmount;
+        function showInvoiceDetails(invoice) {
+            document.getElementById("invoiceCode").textContent = invoice.maphieuxuat;
+            document.getElementById("customerName").textContent = invoice.customer.tenKhachHang;
+            document.getElementById("customerPhone").textContent = invoice.customer.soDT;
+            document.getElementById("customerAddress").textContent = invoice.customer.diaChi;
+            document.getElementById("orderStatus").textContent = invoice.trangThai === 0 ? "Đang xử lý" : "Hoàn thành";
+            document.getElementById("totalAmount").textContent = invoice.tongTien.toLocaleString('vi-VN') + " VNĐ";
 
-                const productListBody = document.getElementById("productListBody");
-                productListBody.innerHTML = ""; // Xóa dữ liệu cũ
-                data.products.forEach((product, index) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${product.id}</td>
-                        <td>${product.name}</td>
-                        <td>${product.quantity}</td>
-                        <td>${product.price}</td>
-                        <td>${product.total}</td>
-                    `;
-                    productListBody.appendChild(row);
-                });
+            const productListBody = document.getElementById("productListBody");
+            productListBody.innerHTML = ""; // Xóa dữ liệu cũ
+            invoice.items.forEach((product, index) => {
+                const total = product.soLuongXuat * product.giaban;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${product.tenSanPham}</td>
+                    <td><img src="admin/${product.hinhAnh}" alt="${product.tenSanPham}" style="width: 50px; height: 50px;"></td>
+                    <td>${product.soLuongXuat}</td>
+                    <td>${product.giaban.toLocaleString('vi-VN')} VNĐ</td>
+                    <td>${total.toLocaleString('vi-VN')} VNĐ</td>
+                `;
+                productListBody.appendChild(row);
+            });
 
-                document.getElementById("invoiceDetailModal").style.display = "flex";
-            }
+            document.getElementById("invoiceDetailModal").style.display = "flex";
         }
 
         // Hàm đóng modal

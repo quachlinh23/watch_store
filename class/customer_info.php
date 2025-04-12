@@ -196,5 +196,30 @@ class Customer {
         }
         return false; // Trả về false nếu không có ảnh
     }
+
+    public function statistical($id, $year) {
+        $id = (int)$id;        // đảm bảo là số nguyên
+        $year = (int)$year;
+    
+        $sql = "SELECT MONTH(ngayLap) AS thang,
+                SUM(tongTien) AS tongChi
+                FROM tbl_phieuxuat
+                WHERE maTaiKhoan = $id
+                AND YEAR(ngayLap) = $year
+                AND trangThai = 1
+                GROUP BY MONTH(ngayLap)
+                ORDER BY MONTH(ngayLap)";
+    
+        $stmt = $this->db->select($sql);
+        $results = [];
+    
+        if ($stmt) {
+            while ($row = $stmt->fetch_assoc()) {
+                $results[] = $row;
+            }
+        }
+    
+        return $results;
+    }
 }
 ?>

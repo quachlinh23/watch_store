@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body 
-    onload="showPage('test1.php', document.querySelector('.sidebar ul li:first-child'))">
+    onload="showPage('daboardAdmin.php', document.querySelector('.sidebar ul li:first-child'))">
     
     <?php
         include 'layout/header.php';
@@ -23,7 +23,7 @@
             include 'layout/sidebar.php';
         ?>
         <main class="content_right">
-            <iframe id="pageFrame" src="test1.php" frameborder="0" width="100%" height="600px"></iframe>
+            <iframe id="pageFrame" src="daboardAdmin.php" frameborder="0" width="100%" height="600px"></iframe>
         </main>
     </div>
 

@@ -9,11 +9,11 @@ $employ = new employee();
 // Lấy thông tin người dùng
 $idUser = intval(Session::get('idEmployee'));
 $inFo = $employ->getEmployeeById($idUser)->fetch_assoc();
-$storedPassword = $inFo['password']; // Lấy mật khẩu từ DB (giả sử đã mã hóa bằng md5)
-$messageInfo = ""; // Thông báo lỗi cho form thông tin
-$messagePass = ""; // Thông báo lỗi cho form đổi mật khẩu
-$showPasswordForm = false; // Biến để kiểm soát hiển thị form đổi mật khẩu
-$showInfoForm = false; // Biến để kiểm soát hiển thị form thông tin
+$storedPassword = $inFo['password'];
+$messageInfo = "";
+$messagePass = "";
+$showPasswordForm = false;
+$showInfoForm = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (isset($_POST['fullname']) && isset($_POST['phone']) && isset($_POST['email'])) {
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             echo '<script>window.location.href="ft.php";</script>';
             exit;
         } else {
-            $messageInfo = $updateEmployee; // Lấy thông báo lỗi từ updateEmployee
-            $showInfoForm = true; // Hiển thị form thông tin nếu có lỗi
+            $messageInfo = $updateEmployee;
+            $showInfoForm = true;
         }
     }
     elseif (isset($_POST['old-pass']) && isset($_POST['new-pass']) && isset($_POST['confirm-pass'])) {
@@ -63,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cài đặt tài khoản</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/fix.css">
