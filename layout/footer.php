@@ -14,9 +14,9 @@
                 <h3><i class="fa fa-store"></i> Về chúng tôi</h3>
                 <ul>
                     <li><a href="infostore.php">Giới thiệu</a></li>
-                    <li><a href="#">Tuyển dụng</a></li>
+                    <li><a href="infostore.php">Tuyển dụng</a></li>
                     <li><a href="contact.php">Góp ý, bảo hành</a></li>
-                    <li><a href="#">Cửa hàng gần đây</a></li>
+                    <li><a href="infostore.php">Cửa hàng gần đây</a></li>
                 </ul>
             </div>
             
@@ -42,12 +42,12 @@
         </div>
         <div class="line"></div>
         <div class="footer-bottom">
-            <p>© 2025-2026 <a href="#">Nhóm 13</a> - Thiết kế bởi: Quách Hồng Linh, Dương Thanh Luận, Trần Thị Khánh Như, Nguyễn Đình Vũ.</p>
+            <p>© 2025-2026 <a href="infostore.php">Nhóm 13</a> - Thiết kế bởi: Quách Hồng Linh, Dương Thanh Luận, Trần Thị Khánh Như, Nguyễn Đình Vũ.</p>
             <div class="social-icons">
-                <a href="#" class="social-icon facebook"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-icon youtube"><i class="fab fa-youtube"></i></a>
-                <a href="#" class="social-icon tiktok"><i class="fab fa-tiktok"></i></a>
+                <a href="infostore.php" class="social-icon facebook"><i class="fab fa-facebook"></i></a>
+                <a href="infostore.php" class="social-icon instagram"><i class="fab fa-instagram"></i></a>
+                <a href="infostore.php" class="social-icon youtube"><i class="fab fa-youtube"></i></a>
+                <a href="infostore.php" class="social-icon tiktok"><i class="fab fa-tiktok"></i></a>
             </div>
         </div>
     </div>
