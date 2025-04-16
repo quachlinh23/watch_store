@@ -10,7 +10,6 @@
                     session_start();
                 }
             }
-                
         }
 
         public static function set($key, $val){
