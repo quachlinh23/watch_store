@@ -22,6 +22,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
 
     $filters = [];
     if (isset($_GET['category'])) $filters['category'] = $_GET['category'];
+    if (isset($_GET['price_min']) && isset($_GET['price_max'])) {
+        $filters['min_price'] = floatval($_GET['price_min']);
+        $filters['max_price'] = floatval($_GET['price_max']);
+    }
 
     $response = ['status' => 'error', 'message' => 'Unknown error'];
 
@@ -130,8 +134,6 @@ ob_end_flush();
 
             <!-- Overlay -->
             <div class="modal-overlay" id="modalOverlay"></div>
-
-            <!-- Modal -->
             <div id="filterModal" class="modal">
                 <div class="modal-content">
                     <div class="header-modal">
@@ -156,6 +158,17 @@ ob_end_flush();
                                         }
                                     }
                                 ?>
+                            </div>
+                        </div>
+
+                        <div class="filter-section">
+                            <h4>Giá sản phẩm</h4>
+                            <div class="border"></div>
+                            <div class="product-grid">
+                                <button type="button" class="price-btn" data-price="0-500000">Dưới 500.000đ</button>
+                                <button type="button" class="price-btn" data-price="500000-2500000">Từ 500.000đ - Dưới 2.500.000đ</button>
+                                <button type="button" class="price-btn" data-price="2500000-5000000">Từ 2.500.000đ - 5.000.000đ</button>
+                                <button type="button" class="price-btn" data-price="5000000-999999999">Trên 5.000.000đ</button>
                             </div>
                         </div>
 
@@ -249,38 +262,55 @@ ob_end_flush();
             }
 
             function toggleFilter(element) {
-                const value = element.dataset.type;
+                const isPrice = element.classList.contains("price-btn");
+                const key = isPrice ? "price" : element.dataset.type;
+                const value = isPrice ? element.dataset.price : element.dataset.type;
                 const text = element.innerText.trim();
 
-                selectedFilters.has(value) ? selectedFilters.delete(value) : selectedFilters.set(value, text);
-                element.classList.toggle("selected");
-                element.classList.toggle("active");
+                if (isPrice) {
+                    // Only one price range can be selected
+                    if (selectedFilters.has("price")) {
+                        document.querySelectorAll(".price-btn.selected").forEach(el => el.classList.remove("selected", "active"));
+                        selectedFilters.delete("price");
+                    }
+                    if (!element.classList.contains("selected")) {
+                        selectedFilters.set("price", value + "|" + text);
+                        element.classList.add("selected", "active");
+                    }
+                } else {
+                    // Categories can have multiple selections
+                    selectedFilters.has(value) ? selectedFilters.delete(value) : selectedFilters.set(value, text);
+                    element.classList.toggle("selected");
+                    element.classList.toggle("active");
+                }
 
                 updateSelectedFilters();
             }
 
             function updateSelectedFilters() {
                 selectedContainer.innerHTML = selectedFilters.size
-                    ? [...selectedFilters].map(([value, text]) => 
-                        `<button class="filter-tag">${text} 
-                            <span class="remove-tag" data-value="${value}">×</span>
-                        </button>`
-                    ).join("")
+                    ? [...selectedFilters].map(([key, val]) => {
+                        const [value, text] = key === "price" ? val.split("|") : [key, val];
+                        return `<button class="filter-tag">${text}
+                                    <span class="remove-tag" data-key="${key}">×</span>
+                                </button>`;
+                    }).join("")
                     : "Không có bộ lọc nào";
                 
                 btnClearAll.style.display = selectedFilters.size > 1 ? "block" : "none";
 
-                document.querySelectorAll(".remove-tag").forEach(tag => 
-                    tag.addEventListener("click", () => removeFilter(tag.dataset.value))
+                document.querySelectorAll(".remove-tag").forEach(tag =>
+                    tag.addEventListener("click", () => removeFilter(tag.dataset.key))
                 );
             }
 
-            function removeFilter(value) {
-                selectedFilters.delete(value);
-                document.querySelectorAll(`[data-type="${value}"]`)
-                    .forEach(el => {
-                        el.classList.remove("selected", "active");
-                    });
+            function removeFilter(key) {
+                selectedFilters.delete(key);
+                if (key === "price") {
+                    document.querySelectorAll(".price-btn").forEach(el => el.classList.remove("selected", "active"));
+                } else {
+                    document.querySelectorAll(`[data-type="${key}"]`).forEach(el => el.classList.remove("selected", "active"));
+                }
                 updateSelectedFilters();
             }
 
@@ -295,7 +325,11 @@ ob_end_flush();
                 let url = `?id=${brandId}&ajax=1&page=${page}`;
                 
                 if (selectedFilters.size > 0) {
-                    const filters = [...selectedFilters].map(([key, value]) => {
+                    const filters = [...selectedFilters].map(([key, val]) => {
+                        if (key === "price") {
+                            const [min, max] = val.split("|")[0].split("-");
+                            return `price_min=${min}&price_max=${max}`;
+                        }
                         return `category=${key}`;
                     }).join('&');
                     url += `&${filters}`;
@@ -350,6 +384,7 @@ ob_end_flush();
             document.getElementById("close").addEventListener("click", () => toggleModal(false));
             overlay.addEventListener("click", () => toggleModal(false));
             document.querySelectorAll(".product-btn").forEach(btn => btn.addEventListener("click", () => toggleFilter(btn)));
+            document.querySelectorAll(".price-btn").forEach(btn => btn.addEventListener("click", () => toggleFilter(btn)));
             document.querySelector(".btn_Cancle").addEventListener("click", clearAllFilters);
             document.getElementById("applyFilter").addEventListener("click", () => {
                 toggleModal(false);

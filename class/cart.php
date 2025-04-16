@@ -299,7 +299,7 @@ class cart {
     
             // Thêm chi tiết phiếu xuất và cập nhật các bảng liên quan
             $stmt_phieuxuat = $this->db->link->prepare(
-                "INSERT INTO tbl_chitietphieuxuat (maPX, mactSP, soLuongXuat) 
+                "INSERT INTO tbl_chitietphieuxuat (maPX, mactSP, soLuongXuat)
                 VALUES (?, ?, ?)"
             );
     
@@ -387,7 +387,7 @@ class cart {
         $idUser = mysqli_real_escape_string($this->db->link, $idUser);
     
         // Truy vấn JOIN 6 bảng
-        $query = "SELECT px.maphieuxuat, px.maTaiKhoan, px.ngayLap, px.tongTien,
+        $query = "SELECT px.maphieuxuat, px.maTaiKhoan, px.ngayLap, px.tongTien, px.ngayhoanThanh,
         px.trangThai, ct.mactPX, ct.mactSP, ct.soLuongXuat, tk_buyer.id
         AS buyer_id, kh.id_khachhang, kh.tenKhachHang, kh.diaChi, kh.soDT,
         kh.email, sp.maSanPham, sp.tenSanPham, sp.hinhAnh, cts.giaban
@@ -489,7 +489,7 @@ class cart {
             }
     
             // Cập nhật trạng thái hóa đơn thành 2 (hủy)
-            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 2 WHERE maphieuxuat = ?");
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 2, ngayhoanThanh = NOW() WHERE maphieuxuat = ?");
             $stmt->bind_param("i", $maPX);
             $stmt->execute();
     
@@ -561,7 +561,7 @@ class cart {
             }
     
             // Cập nhật trạng thái thành Đã nhận hàng (3)
-            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 3 WHERE maphieuxuat = ?");
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 3, ngayhoanThanh = NOW() WHERE maphieuxuat = ?");
             $stmt->bind_param("i", $maPX);
             $stmt->execute();
     
@@ -602,7 +602,7 @@ class cart {
             }
     
             // Cập nhật trạng thái thành Yêu cầu trả hàng (4)
-            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 4 WHERE maphieuxuat = ?");
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 4, ngayhoanThanh = NOW() WHERE maphieuxuat = ?");
             $stmt->bind_param("i", $maPX);
             $stmt->execute();
     

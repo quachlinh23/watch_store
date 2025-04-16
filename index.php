@@ -1,8 +1,10 @@
 <?php
+	session_start();
 	include_once "class/brand.php";
 	include_once "class/page_user.php";
 	$brand = new brand();
 	$page_user = new page_user();
+	$_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 ?>
 <!DOCTYPE HTML>
 	<head>
@@ -311,6 +313,51 @@
 						<div class="product_brands_right_top">
 							<h2 class="brand_name">Đồng Hồ Tangheuer</h2>
 							<a href="productbybrand.php?id=8" class="product_by_brand_details">
+								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
+							</a>
+						</div>
+						<div class="product_brands_right_bottom">
+							<?php foreach ($products as $item): ?>
+								<div class="product_1">
+									<div class="pro_img">
+										<a href="details.php?id=<?= $item['maSanPham'] ?>">
+											<img src="admin/<?= $item['hinhAnh'] ?>" alt="">
+										</a>
+									</div>
+									<div class="descrise">
+										<div class="pro_name">
+											<a href="details.php?id=<?= $item['maSanPham'] ?>" 
+												class="linktoDetails"
+											>
+												<p><?= htmlspecialchars($item['tenSanPham']) ?></p>
+											</a>
+										</div>
+										<div class="pro_price">
+											<p><?= number_format($item['giaBan'], 0, ',', '.') ?>đ</p>
+										</div>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</section>
+			<?php
+			}
+			?>
+
+			<!-- Thương hiệu Michele-->
+			<?php
+				$products = $page_user->loadProduct(12);
+				if (!empty($products)) {
+			?>
+				<section class="product_brands hidden">
+					<div class="product_brands_left">
+						<a href="productbybrand.php?id=12"><img src="images/BannnerChung.jpg" alt=""></a>
+					</div>
+					<div class="product_brands_right">
+						<div class="product_brands_right_top">
+							<h2 class="brand_name">Đồng Hồ Michele</h2>
+							<a href="productbybrand.php?id=12" class="product_by_brand_details">
 								Sản Phẩm Khác  <i class="fas fa-arrow-right"></i>
 							</a>
 						</div>

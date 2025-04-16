@@ -44,7 +44,7 @@ if (isset($_POST['action']) && $userId) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đơn đặt hàng</title>
+    <title>Watch Store</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/order.css">
     <link rel="stylesheet" href="css/head.css">
@@ -62,14 +62,15 @@ if (isset($_POST['action']) && $userId) {
             border: none;
             border-radius: 8px;
             background: #e5e7eb;
-            color: #1e3a8a;
+            color: #007bff;
             cursor: pointer;
             font-size: 1rem;
             transition: background 0.3s, transform 0.2s;
+            font-weight: bold;
         }
 
         .tab-btn.active {
-            background: #1e3a8a;
+            background: #007bff;
             color: #fff;
         }
 
@@ -99,9 +100,8 @@ if (isset($_POST['action']) && $userId) {
             <button class="tab-btn active" data-tab="processing" onclick="filterInvoices('processing')">Đang xử lý</button>
             <button class="tab-btn" data-tab="approved" onclick="filterInvoices('approved')">Đơn đang được vận chuyển</button>
             <button class="tab-btn" data-tab="received" onclick="filterInvoices('received')">Hoàn thành</button>
-            <button class="tab-btn" data-tab="cancelled" onclick="filterInvoices('cancelled')">Đơn hủy</button>
+            <button class="tab-btn" data-tab="cancelled" onclick="filterInvoices('cancelled')">Đã hủy</button>
         </div>
-        <h2>Lịch Sử Đơn Đặt Hàng</h2>
         <div class="cart-content">
             <?php if (!$userId): ?>
                 <p style="text-align: center;">Vui lòng <a href="login.php">đăng nhập</a> để xem lịch sử đơn hàng.</p>
@@ -151,6 +151,7 @@ if (isset($_POST['action']) && $userId) {
                                             onclick="markAsReceived(<?php echo $invoice['maphieuxuat']; ?>)">
                                             Đã nhận hàng
                                         </button>
+                                        
                                     <?php elseif ($invoice['trangThai'] == 3): ?>
                                         <button class="btn-return"
                                             onclick="requestReturn(<?php echo $invoice['maphieuxuat']; ?>)">

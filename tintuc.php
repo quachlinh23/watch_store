@@ -9,7 +9,7 @@ $brand = new brand();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tin Tức Đồng Hồ 2025 - Watch Store</title>
+    <title>Watch Store</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">

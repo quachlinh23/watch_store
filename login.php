@@ -1,13 +1,23 @@
 <?php
+    session_start();
     include 'class/customerlogin.php';
+
     $customer = new customerlogin();
     $er = "";
+
+    // Store redirect URL only if needed (e.g., before login attempt)
+    if (!isset($_SESSION['redirect_url'])) {
+        $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         $login_msg = $customer->login($_POST);
         if ($login_msg === true) {
-            header('Location: index.php');
+            $redirect = isset($_SESSION['redirect_url']) ? $_SESSION['redirect_url'] : 'index.php';
+            unset($_SESSION['redirect_url']);
+            header("Location: $redirect");
             exit();
-        }else{
+        } else {
             $er = $login_msg;
         }
     }
@@ -18,7 +28,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập</title>
+    <title>Watch Store</title>
     <link rel="stylesheet" href="css/test.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>

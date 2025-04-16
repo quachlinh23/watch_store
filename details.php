@@ -14,7 +14,7 @@ $productInfo = $product->getProductById($id); // Thông tin sản phẩm
 $formatted_price = number_format($productInfo['giaban'], 0, ',', '.');
 $userId = $_SESSION['customer_id'] ?? null;
 $ratings = $rating->getRatingsWithCustomerInfo($id); // Danh sách đánh giá
-
+$_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 // Kiểm tra xem người dùng đã đánh giá chưa
 $userHasRated = false;
 $userRating = null;
@@ -134,7 +134,7 @@ if (isset($_POST['add_to_cart'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Details</title>
+    <title>Watch Store</title>
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/details_1.css">
@@ -354,6 +354,7 @@ if (isset($_POST['add_to_cart'])) {
             <p>Đổi trả trong vòng 7 ngày</p>
         </div>
     </section>
+
     <?php include 'layout/footer.php';?>
     <script>
         // Lấy số lượng tồn từ PHP
@@ -399,8 +400,23 @@ if (isset($_POST['add_to_cart'])) {
         });
 
         function openReviewModal() {
-            document.getElementById("reviewModal").style.display = "flex";
-            // Không cần đặt lại nếu đang chỉnh sửa, vì đã điền sẵn từ PHP
+            <?php if (!$userId): ?>
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa đăng nhập!',
+                    text: 'Vui lòng đăng nhập để viết đánh giá.',
+                    confirmButtonText: 'Đăng nhập',
+                    showCancelButton: true,
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.php';
+                    }
+                });
+                return;
+            <?php else: ?>
+                document.getElementById("reviewModal").style.display = "flex";
+            <?php endif; ?>
         }
 
         function closeReviewModal() {

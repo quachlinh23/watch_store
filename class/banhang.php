@@ -178,7 +178,7 @@ class banhang {
         $idInvoice = mysqli_real_escape_string($this->db->link, $idInvoice);
         $idUser = mysqli_real_escape_string($this->db->link, $idUser);
         $query = "UPDATE tbl_phieuxuat
-                SET trangThai = 1, nguoiDuyet = '$idUser'
+                SET trangThai = 1, nguoiDuyet = '$idUser', ngayhoanThanh = NOW()
                 WHERE maphieuxuat = '$idInvoice'";
         $result = $this->db->update($query);
         if ($result) {
@@ -214,7 +214,7 @@ class banhang {
     
             // Cập nhật trạng thái hóa đơn thành 5 (đồng ý trả hàng)
             $stmt = $this->db->link->prepare(
-                "UPDATE tbl_phieuxuat SET trangThai = 2, nguoiDuyet = ? WHERE maphieuxuat = ?"
+                "UPDATE tbl_phieuxuat SET trangThai = 2, nguoiDuyet = ?, ngayhoanThanh = NOW() WHERE maphieuxuat = ?"
             );
             $stmt->bind_param("ii", $nguoiduyet, $maPX);
             $stmt->execute();

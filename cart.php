@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch Store - Giỏ Hàng</title>
+    <title>Watch Store</title>
     <link rel="stylesheet" href="css/cart.css">
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">
@@ -437,7 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
 
             // Chuyển hướng sang buynow.php
-            window.location.href = "buy_now.php";
+            window.location.href = "InvoiceByCart.php";
         });
     </script>
 </body>

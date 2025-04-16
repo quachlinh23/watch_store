@@ -102,6 +102,7 @@ class Customer {
             return "Lỗi hệ thống: " . $e->getMessage();
         }
     }
+
     public function changePassword($id_taikhoan, $old_password, $new_password, $confirm_password) {
         try {
             $id_taikhoan = $this->fm->validation($id_taikhoan);
@@ -160,6 +161,7 @@ class Customer {
             return "Lỗi hệ thống: " . $e->getMessage();
         }
     }
+    
     // Lưu hoặc cập nhật ảnh đại diện
     public function updateAvatar($id_taikhoan, $hinh_anh) {
         $sql_check = "SELECT id_anh FROM tbl_anhdaidien WHERE id_taikhoan = ?";
@@ -206,7 +208,7 @@ class Customer {
                 FROM tbl_phieuxuat
                 WHERE maTaiKhoan = $id
                 AND YEAR(ngayLap) = $year
-                AND trangThai = 1
+                AND trangThai = 3
                 GROUP BY MONTH(ngayLap)
                 ORDER BY MONTH(ngayLap)";
     
