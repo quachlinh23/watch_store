@@ -344,6 +344,21 @@
             $result = $stmt->get_result()->fetch_assoc();
             return $result;
         }
+
+        public function getSubImgProductById($idProduct) {
+            $subImages = array();
+            $idProduct = intval($idProduct);
+            $sql = "SELECT hinhAnh FROM tbl_anhspphu WHERE id_sanpham = ?";
+            $stmt = $this->db->link->prepare($sql);
+            $stmt->bind_param("i", $idProduct);
+            $stmt->execute();
+            $result = $stmt->get_result();
         
+            while ($row = $result->fetch_assoc()) {
+                $subImages[] = $row['hinhAnh'];
+            }
+        
+            return $subImages;
+        }
     }
 ?>

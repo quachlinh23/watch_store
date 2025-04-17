@@ -11,6 +11,7 @@ class cart {
         $this->fm = new Format();
     }
 
+    //Lấy id giỏ hàng của một khách hàng
     public function getcartidbycustomer($idKhachHang) {
         $idKhachHang = mysqli_real_escape_string($this->db->link, $idKhachHang);
         $query = "SELECT magiohang FROM tbl_giohang WHERE maTaiKhoan = '$idKhachHang' LIMIT 1";
@@ -21,6 +22,7 @@ class cart {
         return 0;
     }
 
+    //Update lại số lượng
     private function update_cart_total($id_giohang) {
         $stmt = $this->db->link->prepare("SELECT SUM(thanhTien) as total FROM tbl_chitietgiohang WHERE maGioHang = ?");
         $stmt->bind_param("i", $id_giohang);
@@ -35,6 +37,7 @@ class cart {
         return $total;
     }
 
+    //Thêm một sản phẩm vào giỏ hàng
     public function addtocart($id_giohang, $id_sanpham, $soLuong) {
         $quantity = (int)$this->fm->validation($soLuong);
         $id_giohang = (int)$this->fm->validation($id_giohang);
@@ -99,6 +102,7 @@ class cart {
         return ['status' => 'error', 'message' => 'Sản phẩm không tồn tại trong kho!'];
     }
 
+    //Hiển thị danh sách sản phẩm trong giỏ hàng của một user
     public function showCart($id) {
         $id_cart = intval($id);
         $query = "SELECT
@@ -129,6 +133,7 @@ class cart {
         return $data;
     }
 
+    //Tăng số lượng sản phẩm trong giỏ hàng
     public function increment_quantity($id_giohang, $id_sanpham) {
         $stmt = $this->db->link->prepare("SELECT soLuong, (SELECT soluongTon FROM tbl_chitietsanpham WHERE masanpham = ?) as soluongTon, (SELECT giaban FROM tbl_chitietsanpham WHERE masanpham = ?) as giaban FROM tbl_chitietgiohang WHERE maGioHang = ? AND maSanPham = ?");
         $stmt->bind_param("iiii", $id_sanpham, $id_sanpham, $id_giohang, $id_sanpham);
@@ -162,6 +167,7 @@ class cart {
         return ["success" => false, "message" => "Tăng số lượng thất bại"];
     }
 
+    //Giảm số lượng sản phẩm trong giỏ hàng
     public function decrement_quantity($id_giohang, $id_sanpham) {
         $stmt = $this->db->link->prepare("SELECT soLuong, (SELECT soluongTon FROM tbl_chitietsanpham WHERE masanpham = ?) as soluongTon, (SELECT giaban FROM tbl_chitietsanpham WHERE masanpham = ?) as giaban FROM tbl_chitietgiohang WHERE maGioHang = ? AND maSanPham = ?");
         $stmt->bind_param("iiii", $id_sanpham, $id_sanpham, $id_giohang, $id_sanpham);
@@ -241,6 +247,7 @@ class cart {
         return ["success" => false, "message" => "Xóa sản phẩm thất bại"];
     }
 
+    //Đếm số lượng sản phẩm trong giỏ hàng để hiển thị ở header
     public function countProductCartByUser($id_giohang) {
         $id_giohang = intval($id_giohang);
     
@@ -256,6 +263,7 @@ class cart {
         return 0; // Nếu truy vấn lỗi
     }
 
+    //Mua sản phẩm từ giỏ hàng
     public function process_checkout($maTaiKhoan, $items, $shipping_info) {
         if (empty($maTaiKhoan) || empty($items) || empty($shipping_info)) {
             return ['success' => false, 'message' => 'Thông tin không đầy đủ'];
@@ -338,6 +346,83 @@ class cart {
         }
     }
 
+    //Mua sản phẩm trực tiếp từ trang details
+    public function process_checkout_buynow($maTaiKhoan, $items, $shipping_info) {
+        if (empty($maTaiKhoan) || empty($items) || empty($shipping_info)) {
+            return ['success' => false, 'message' => 'Thông tin không đầy đủ'];
+        }
+    
+        $this->db->link->begin_transaction();
+    
+        try {
+            // Tính tổng tiền
+            $total = 0;
+            foreach ($items as $item) {
+                $id_sanpham = (int)$item['idProduct'];
+                $quantity = (int)$item['quantity'];
+                $price = (float)$item['price'];
+    
+                // Kiểm tra tồn kho
+                $stmt = $this->db->link->prepare("SELECT mact, soluongTon FROM tbl_chitietsanpham WHERE masanpham = ?");
+                $stmt->bind_param("i", $id_sanpham);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stock = $result->fetch_assoc();
+    
+                if (!$stock || $stock['soluongTon'] < $quantity) {
+                    throw new Exception("Sản phẩm ID $id_sanpham không đủ số lượng tồn kho.");
+                }
+    
+                $total += $price * $quantity;
+            }
+    
+            // Thêm phiếu xuất vào tbl_phieuxuat
+            $stmt = $this->db->link->prepare(
+                "INSERT INTO tbl_phieuxuat (maTaiKhoan, ngayLap, tongTien, trangThai, nguoiDuyet) 
+                VALUES (?, NOW(), ?, 0, NULL)"
+            );
+            $stmt->bind_param("id", $maTaiKhoan, $total);
+            $stmt->execute();
+            $phieuxuat_id = $this->db->link->insert_id;
+    
+            // Thêm chi tiết phiếu xuất và cập nhật tồn kho
+            $stmt_phieuxuat = $this->db->link->prepare(
+                "INSERT INTO tbl_chitietphieuxuat (maPX, mactSP, soLuongXuat)
+                VALUES (?, ?, ?)"
+            );
+    
+            foreach ($items as $item) {
+                $id_sanpham = (int)$item['idProduct'];
+                $quantity = (int)$item['quantity'];
+    
+                // Lấy mact từ tbl_chitietsanpham
+                $stmt = $this->db->link->prepare("SELECT mact FROM tbl_chitietsanpham WHERE masanpham = ?");
+                $stmt->bind_param("i", $id_sanpham);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $mact = $result->fetch_assoc()['mact'];
+    
+                // Thêm chi tiết phiếu xuất
+                $stmt_phieuxuat->bind_param("iii", $phieuxuat_id, $mact, $quantity);
+                $stmt_phieuxuat->execute();
+    
+                // Cập nhật số lượng tồn kho trong tbl_chitietsanpham
+                $update_stmt = $this->db->link->prepare(
+                    "UPDATE tbl_chitietsanpham SET soluongTon = soluongTon - ? WHERE masanpham = ?"
+                );
+                $update_stmt->bind_param("ii", $quantity, $id_sanpham);
+                $update_stmt->execute();
+            }
+    
+            $this->db->link->commit();
+            return ['success' => true, 'message' => 'Phiếu xuất đã được tạo thành công', 'phieuxuat_id' => $phieuxuat_id];
+        } catch (Exception $e) {
+            $this->db->link->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    //Xóa sản phẩm khỏi giỏ hàng
     public function removecart($id_giohang, $id_sanpham, $quantity_to_remove) {
         // Lấy số lượng hiện tại trong giỏ hàng
         $stmt = $this->db->link->prepare(
@@ -383,6 +468,7 @@ class cart {
         ];
     }
 
+    //Lấy danh sách hóa đơn của một user
     public function loadInvoiceOfUser($idUser) {
         $idUser = mysqli_real_escape_string($this->db->link, $idUser);
     
@@ -465,6 +551,7 @@ class cart {
         return $invoices;
     }
 
+    //Hủy hóa đơn 
     public function cancelOrder($maPX) {
         if (empty($maPX)) {
             return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
@@ -537,6 +624,7 @@ class cart {
         }
     }
 
+    //Xác nhận đã nhận hàng từ user
     public function markAsReceived($maPX) {
         if (empty($maPX)) {
             return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
@@ -578,6 +666,7 @@ class cart {
         }
     }
 
+    //Yêu cầu trả hàng từ user
     public function requestReturn($maPX) {
         if (empty($maPX)) {
             return ['success' => false, 'message' => 'Mã phiếu xuất không hợp lệ'];
@@ -602,7 +691,7 @@ class cart {
             }
     
             // Cập nhật trạng thái thành Yêu cầu trả hàng (4)
-            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 4, ngayhoanThanh = NOW() WHERE maphieuxuat = ?");
+            $stmt = $this->db->link->prepare("UPDATE tbl_phieuxuat SET trangThai = 4, ngayhoanThanh = NOW(), nguoiDuyet = NULL WHERE maphieuxuat = ?");
             $stmt->bind_param("i", $maPX);
             $stmt->execute();
     

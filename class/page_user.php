@@ -61,9 +61,7 @@ class Page_user {
 
     //Lọc sản phẩm theo từ khóa(Mở rộng lọc theo giá, theo loại, theo thương hiệu)
     private function normalizeKeyword($keyword) {
-        // Chuẩn hóa từ khóa: loại bỏ khoảng trắng thừa, chuyển về chữ thường
         $keyword = trim(strtolower($keyword));
-        // Xử lý tiếng Việt (bỏ dấu)
         $unaccented = [
             'a' => '[àáảãạăắằẳẵặâấầẩẫậ]',
             'e' => '[èéẻẽẹêếềểễệ]',
@@ -78,6 +76,7 @@ class Page_user {
         }
         return $keyword;
     }
+
 
     public function SearchProductsByKey($keyword = '', $page = 1, $limit = 10, $filters = []) {
         try {
@@ -118,7 +117,7 @@ class Page_user {
 
             // Truy vấn lấy danh sách sản phẩm
             $sql = "SELECT sp.*, ct.soluongTon, ct.giaBan,
-                           (CASE 
+                            (CASE
                                 WHEN LOWER(sp.tenSanPham) LIKE '$escapedKeyword%' THEN 3
                                 WHEN LOWER(sp.tenSanPham) LIKE '%$escapedKeyword%' THEN 2
                                 WHEN LOWER(sp.tenSanPham) LIKE '$escapedNormalizedKeyword%' THEN 1
@@ -163,7 +162,7 @@ class Page_user {
         }
     }
 
-    #Hàm load danh sách các sản phẩm lên trang index
+    //Hàm load danh sách các sản phẩm lên trang index
     public function loadProduct($brandId){
         $brandId = intval($brandId);
         $query = "SELECT sp.*, ct.giaBan
@@ -184,6 +183,7 @@ class Page_user {
         return $products; // Trả về dạng mảng
     }
 
+    //Hiển thị danh sách sản phẩm
     public function loadNewProduct() {
         $query = "SELECT sp.maSanPham, sp.tenSanPham, sp.moTa, sp.hinhAnh, sp.id_thuonghieu,
         ctsp.giaBan AS giaBanSP, ctsp.soluongTon, pn.ngayLap

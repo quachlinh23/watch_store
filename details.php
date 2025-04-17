@@ -182,16 +182,34 @@ if (isset($_POST['add_to_cart'])) {
                 </div>
 
                 <div class="thumbnail-container">
-                    <button class="nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-                    <div class="thumbnails" id="thumbnails">
-                        <img class="thumb" src="images/sanphamdemo.jpg" onclick="changeImage(this)">
-                        <img class="thumb" src="images/sanphamdemo_1.png" onclick="changeImage(this)">
-                        <img class="thumb" src="images/sanphamdemo.jpg" onclick="changeImage(this)">
-                        <img class="thumb" src="images/sanphamdemo_1.png" onclick="changeImage(this)">
-                        <img class="thumb" src="images/sanphamdemo.jpg" onclick="changeImage(this)">
-                    </div>
-                    <button class="nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                <?php
+                    $ImgSub = $product->getSubImgProductById($id);
+                    // Kiểm tra số lượng hình ảnh
+                    if (isset($ImgSub) && !empty($ImgSub) && count($ImgSub) >= 4) {
+                        echo '<button class="nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>';
+                    }
+                ?>
+                
+                <div class="thumbnails" id="thumbnails">
+                    <?php
+                        if (isset($ImgSub) && !empty($ImgSub)) {
+                            foreach ($ImgSub as $img) {
+                                echo '<img class="thumb" src="admin/' . htmlspecialchars($img) . '" onclick="changeImage(this)">';
+                            }
+                        } else {
+                            echo '<img class="thumb" src="admin/' . htmlspecialchars($productInfo['hinhAnh']) . '" onclick="changeImage(this)">';
+                        }
+                    ?>
                 </div>
+                
+                <?php
+                    // Hiển thị nút next nếu có đủ hình ảnh
+                    if (isset($ImgSub) && !empty($ImgSub) && count($ImgSub) >= 4) {
+                        echo '<button class="nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>';
+                    }
+                ?>
+            </div>
+
             </div>
 
             <div class="product-info">
@@ -218,7 +236,7 @@ if (isset($_POST['add_to_cart'])) {
                         <div class="buttons">
                             <input type="hidden" name="product_id" value="<?php echo $productInfo['maSanPham']; ?>">
                             <button class="add-to-cart" type="button" id="addToCartBtn">Thêm vào giỏ</button>
-                            <button class="buy-now"><a href="buy_now.php" style="text-decoration: none; color: white;">Mua ngay</a></button>
+                            <button class="buy-now" id="buyNowBtn" style="text-decoration: none; color: white;">Mua ngay</a></button>
                         </div>
                     </form>
                 </div>
@@ -584,6 +602,76 @@ if (isset($_POST['add_to_cart'])) {
                     text: 'Có lỗi xảy ra khi thêm vào giỏ hàng!',
                     confirmButtonText: 'OK'
                 });
+            });
+        });
+
+        document.querySelector("#buyNowBtn").addEventListener("click", function(e) {
+            e.preventDefault();
+            
+            // Kiểm tra đăng nhập
+            <?php if (!$userId): ?>
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa đăng nhập!',
+                    text: 'Vui lòng đăng nhập để tiếp tục thanh toán.',
+                    confirmButtonText: 'Đăng nhập',
+                    showCancelButton: true,
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Lưu URL hiện tại để quay lại sau khi đăng nhập
+                        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                        window.location.href = 'login.php';
+                    }
+                });
+                return;
+            <?php endif; ?>
+
+            const quantity = document.querySelector("#quantity").value;
+            const maxQuantity = <?php echo $productInfo['soluongTon']; ?>;
+
+            // Kiểm tra số lượng hợp lệ
+            if (!quantity || parseInt(quantity) <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Số lượng không hợp lệ!',
+                    text: 'Vui lòng nhập số lượng lớn hơn 0.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            if (parseInt(quantity) > maxQuantity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Số lượng vượt quá!',
+                    text: `Số lượng tối đa có thể chọn là ${maxQuantity}.`,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            // Lưu thông tin sản phẩm vào sessionStorage
+            const selectedItems = [{
+                idProduct: <?php echo $productInfo['maSanPham']; ?>,
+                quantity: parseInt(quantity),
+                price: <?php echo $productInfo['giaban']; ?>,
+                name: "<?php echo addslashes($productInfo['tenSanPham']); ?>",
+                image: "admin/<?php echo $productInfo['hinhAnh']; ?>",
+                stock: <?php echo $productInfo['soluongTon']; ?>
+            }];
+
+            sessionStorage.setItem("checkoutItemsNow", JSON.stringify(selectedItems));
+
+            // Chuyển hướng đến trang thanh toán
+            Swal.fire({
+                icon: 'success',
+                title: 'Đang chuyển đến thanh toán...',
+                text: 'Vui lòng kiểm tra thông tin đơn hàng.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = 'InvoiceNow.php';
             });
         });
     </script>

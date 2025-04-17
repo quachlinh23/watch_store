@@ -79,6 +79,8 @@ Session::init();
     if (isset($_GET['logout'])) {
         Session::set('customer_login', false);
         $current_page = basename($_SERVER['PHP_SELF']);
+        session_unset();
+        session_destroy();
         if ($current_page === 'profile.php' || $current_page === 'order.php' || $current_page === 'cart.php'
         || $current_page === 'details.php' || $current_page === 'productbybrand.php') {
             header("Location: index.php");
