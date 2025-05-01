@@ -510,6 +510,7 @@ class cart {
                 }
                 $current_invoice = [
                     'maphieuxuat' => $maphieuxuat,
+                    'ngayhoanThanh' => $row['ngayhoanThanh'],
                     'maTaiKhoan' => (int)$row['maTaiKhoan'],
                     'ngayLap' => $row['ngayLap'],
                     'tongTien' => (float)$row['tongTien'],
@@ -551,6 +552,19 @@ class cart {
         return $invoices;
     }
 
+    public function getNgayHoanThanh($maphieuxuat) {
+        $maphieuxuat = mysqli_real_escape_string($this->db->link, $maphieuxuat);
+    
+        $query = "SELECT ngayhoanThanh FROM tbl_phieuxuat WHERE maphieuxuat = $maphieuxuat LIMIT 1";
+        $result = $this->db->select($query);
+    
+        if ($result && $row = $result->fetch_assoc()) {
+            return $row['ngayhoanThanh']; // Trả về chuỗi '2025-04-18' chẳng hạn
+        }
+    
+        return null; // Không tìm thấy
+    }
+    
     //Hủy hóa đơn 
     public function cancelOrder($maPX) {
         if (empty($maPX)) {

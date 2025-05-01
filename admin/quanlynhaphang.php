@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['CONTENT_TYPE']) && 
                                 if ($sanpham) {
                                     $sanpham->data_seek(0);
                                     while ($sanphamlist = $sanpham->fetch_assoc()) {
-                                        echo '<option value="' . $sanphamlist['maSanPham'] . '|' . $sanphamlist['tenSanPham'] . '">' . $sanphamlist['tenSanPham'] . '</option>';
+                                        echo '<option value="' . $sanphamlist['maSanPham'] . '|' . $sanphamlist['tenSanPham'] . '">' . $sanphamlist['maSanPham'] . ' - ' . $sanphamlist['tenSanPham'] . '</option>';
                                     }
                                 }
                                 ?>

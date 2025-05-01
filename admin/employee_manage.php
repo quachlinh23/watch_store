@@ -136,13 +136,12 @@
                 <thead>
                     <tr>
                         <th style="width: 5%;">STT</th>
-                        <th style="width: 18%;">Tên nhân viên</th>
+                        <th style="width: 20%;">Tên nhân viên</th>
                         <th style="width: 12%;">SĐT</th>
                         <th style="width: 18%;">Email</th>
                         <th style="width: 12%;">Tài khoản</th>
-                        <th style="width: 12%;">Quyền</th>
                         <th style="width: 13%;">Trạng thái</th>
-                        <th style="width: 10%;">Hành động</th>
+                        <th style="width: 20%;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,7 +163,6 @@
                         <td><?php echo $result['soDT']?></td>
                         <td><?php echo $result['email']?></td>
                         <td><?php echo $result['username']?></td>
-                        <td><?php echo $result['quyen']?></td>
                         <td><?php echo ($result['trangthai'] == 1) ? "Còn làm" : "Nghỉ làm"; ?></td>
                         <td class="btn-container">
                             <form action="" method="POST">
@@ -218,7 +216,7 @@
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="permission" value="256"> Quản lý slider</td>
-                            <td></td>
+                            <td><input type="checkbox" class="permission" value="512"> CSKH</td>
                         </tr>
 
                         <!-- Input ẩn để lưu tổng quyền -->

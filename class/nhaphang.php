@@ -78,10 +78,11 @@ class nhaphang {
 
     public function getAllImports() {
         $query = "SELECT pn.maPhieuNhap, ncc.tenNCC, pn.ngayLap, nv.tenNhanVien, pn.tongTien
-                FROM tbl_phieunhap pn 
+                FROM tbl_phieunhap pn
                 JOIN tbl_nhacungcap ncc ON pn.maNCC = ncc.id_nhacungcap
                 JOIN tbl_taikhoannhanvien tknv ON pn.maTaiKhoan = tknv.id
-                JOIN tbl_nhanvien nv ON tknv.id = nv.id_taikhoan";
+                JOIN tbl_nhanvien nv ON tknv.id = nv.id_taikhoan
+                ORDER BY pn.ngayLap DESC";
         $result = $this->db->select($query);
         return $result;
     }

@@ -12,55 +12,101 @@ $customer_info = new customer();
 if ($loggedIn) {
     $customer = new customerlogin();
     $customerId = $_SESSION['customer_id'];
-    $customerInfo = $customer->getinforcustomerbyid($customerId)->fetch_assoc();
-    $missingInfo = empty($customerInfo['tenKhachHang']) || empty($customerInfo['soDT']) || empty($customerInfo['diaChi']);
+    $result = $customer->getinforcustomerbyid($customerId);
+    if ($result && $customerInfo = $result->fetch_assoc()) {
+        $missingInfo = empty($customerInfo['tenKhachHang']) || empty($customerInfo['soDT']) || empty($customerInfo['diaChi']);
+    } else {
+        $missingInfo = true;
+        error_log("Failed to fetch customer info for ID: $customerId");
+    }
 }
 
+// Xử lý cập nhật thông tin từ form
 if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName'])) {
-    $customer = new customerlogin();
     $customerId = $_SESSION['customer_id'];
     
-    // Get form data
-    $fullName = $_POST['fullName'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'] ?? '';
-    $address = $_POST['address'];
-    $ward = $_POST['ward'];
-    $district = $_POST['district'];
-    $city = $_POST['city'];
+    // Lấy dữ liệu từ form
+    $fullName = trim($_POST['fullName'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $ward = trim($_POST['ward'] ?? '');
+    $district = trim($_POST['district'] ?? '');
+    $city = trim($_POST['city'] ?? '');
 
-    // Construct the full address
-    $fullAddress = "$address, $ward, $district, $city";
+    // Xác thực dữ liệu
+    $errors = [];
+    if (empty($fullName)) {
+        $errors[] = "Họ và tên không được để trống";
+    }
+    if (empty($phone)) {
+        $errors[] = "Số điện thoại không được để trống";
+    }
+    if (empty($address)) {
+        $errors[] = "Địa chỉ chi tiết không được để trống";
+    }
+    if (empty($ward)) {
+        $errors[] = "Xã/Phường không được để trống";
+    }
+    if (empty($district)) {
+        $errors[] = "Quận/Huyện không được để trống";
+    }
+    if (empty($city)) {
+        $errors[] = "Tỉnh/Thành phố không được để trống";
+    }
 
-    // Call updateCustomerInfo to save to the database
-    $updateResult = $customer_info->updateCustomerInfo($customerId, $fullName, $fullAddress, $phone, $email);
-
-    if ($updateResult === true) {
-        // Update session data
-        $_SESSION['shipping_info'] = [
-            'fullName' => $fullName,
-            'phone' => $phone,
-            'email' => $email,
-            'address' => $address,
-            'ward' => $ward,
-            'district' => $district,
-            'city' => $city
-        ];
-
-        $addressDisplay = $fullAddress;
+    if (!empty($errors)) {
+        $errorMessage = htmlspecialchars(implode(". ", $errors));
         echo "<script>
-            document.querySelector('.address-content').textContent = '$addressDisplay';
-            document.getElementById('addressModal').style.display = 'none';
-            document.body.classList.remove('no-scroll');
-            alert('Thông tin giao hàng đã được lưu!');
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '$errorMessage',
+                confirmButtonText: 'OK'
+            });
         </script>";
     } else {
-        // Display error message from updateCustomerInfo
-        echo "<script>
-            document.getElementById('addressModal').style.display = 'none';
-            document.body.classList.remove('no-scroll');
-            alert('Lỗi: $updateResult');
-        </script>";
+        // Ghép địa chỉ đầy đủ
+        $fullAddress = "$address, $ward, $district, $city";
+
+        $updateResult = $customer_info->updateCustomerInfo($customerId, $fullName, $fullAddress, $phone, $email);
+
+        if ($updateResult === true) {
+            // Cập nhật session data
+            $_SESSION['shipping_info'] = [
+                'fullName' => $fullName,
+                'phone' => $phone,
+                'email' => $email,
+                'address' => $address,
+                'ward' => $ward,
+                'district' => $district,
+                'city' => $city
+            ];
+
+            $addressDisplay = htmlspecialchars($fullAddress);
+            $nameDisplay = htmlspecialchars($fullName);
+            $phoneDisplay = htmlspecialchars($phone);
+            echo "<script>
+                document.querySelector('.address-content').textContent = '$addressDisplay';
+                document.querySelector('.text-gray-700.text-lg.mt-1').textContent = '$nameDisplay | $phoneDisplay';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: 'Thông tin giao hàng đã được lưu!',
+                    confirmButtonText: 'OK'
+                });
+            </script>";
+        } else {
+            $errorMessage = htmlspecialchars($updateResult);
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: '$errorMessage',
+                    confirmButtonText: 'OK'
+                });
+            </script>";
+        }
     }
 }
 ?>
@@ -72,13 +118,17 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Watch Store</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Watch Store - Thanh toán</title>
     <style>
-        .no-scroll { overflow: hidden; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; border-radius: 8px; }
-        .close { float: right; font-size: 24px; cursor: pointer; }
         select, input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        .quantity-container { display: flex; align-items: center; }
+        .quantity-container button { width: 30px; height: 30px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; cursor: pointer; }
+        .quantity-container input { width: 50px; text-align: center; margin: 0 5px; }
+        .remove-btn { background: none; border: none; cursor: pointer; color: #e53e3e; }
+        input.quantity::-webkit-outer-spin-button,
+        input.quantity::-webkit-inner-spin-button {-webkit-appearance: none;margin: 0;}
+        input.quantity {-moz-appearance: textfield;}
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -98,8 +148,8 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                             if ($missingInfo && !isset($_SESSION['shipping_info'])) {
                                 echo "Vui lòng cung cấp thông tin giao hàng";
                             } else {
-                                $name = isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['fullName'] : $customerInfo['tenKhachHang'];
-                                $phone = isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['phone'] : $customerInfo['soDT'];
+                                $name = isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['fullName'] : ($customerInfo['tenKhachHang'] ?? 'Chưa cung cấp');
+                                $phone = isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['phone'] : ($customerInfo['soDT'] ?? 'Chưa cung cấp');
                                 echo htmlspecialchars("$name | $phone");
                             }
                             ?>
@@ -107,13 +157,13 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                         <p class="text-gray-700 text-lg flex items-center mt-1">
                             <i class="fa-solid fa-location-dot mr-2"></i>
                             <span class="address-content">
-                                <?php 
+                                <?php
                                 if ($missingInfo && !isset($_SESSION['shipping_info'])) {
-                                    echo "Vui lòng cung cấp thông tin giao hàng";
+                                    echo "";
                                 } else {
                                     $address = isset($_SESSION['shipping_info']) 
                                         ? $_SESSION['shipping_info']['address'] . ', ' . $_SESSION['shipping_info']['ward'] . ', ' . $_SESSION['shipping_info']['district'] . ', ' . $_SESSION['shipping_info']['city']
-                                        : $customerInfo['diaChi'];
+                                        : ($customerInfo['diaChi'] ?? 'Chưa cung cấp');
                                     echo htmlspecialchars($address);
                                 }
                                 ?>
@@ -121,7 +171,44 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                         </p>
                     </div>
 
-                    <button onclick="openAddressModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Cập nhật thông tin</button>
+                    <!-- Form để cập nhật thông tin -->
+                    <form id="addressForm" method="POST" action="">
+                        <div class="mb-4">
+                            <label for="fullName" class="block text-base font-medium mb-2">Họ và tên:</label>
+                            <input type="text" id="fullName" name="fullName" value="<?php echo isset($_SESSION['shipping_info']) ? htmlspecialchars($_SESSION['shipping_info']['fullName']) : ($loggedIn && $customerInfo ? htmlspecialchars($customerInfo['tenKhachHang']) : ''); ?>" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="phone" class="block text-base font-medium mb-2">Số điện thoại:</label>
+                            <input type="tel" id="phone" name="phone" value="<?php echo isset($_SESSION['shipping_info']) ? htmlspecialchars($_SESSION['shipping_info']['phone']) : ($loggedIn && $customerInfo ? htmlspecialchars($customerInfo['soDT']) : ''); ?>" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="block text-base font-medium mb-2">Email:</label>
+                            <input type="email" id="email" name="email" value="<?php echo isset($_SESSION['shipping_info']) ? htmlspecialchars($_SESSION['shipping_info']['email']) : ($loggedIn && $customerInfo ? htmlspecialchars($customerInfo['email'] ?? '') : ''); ?>">
+                        </div>
+                        <div class="mb-4">
+                            <label for="city" class="block text-base font-medium mb-2">Tỉnh/Thành phố:</label>
+                            <select id="city" name="city" required>
+                                <option value="">Chọn Tỉnh/Thành phố</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="district" class="block text-base font-medium mb-2">Quận/Huyện:</label>
+                            <select id="district" name="district" required>
+                                <option value="">Chọn Quận/Huyện</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="ward" class="block text-base font-medium mb-2">Xã/Phường:</label>
+                            <select id="ward" name="ward" required>
+                                <option value="">Chọn Xã/Phường</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                        <label for="address" class="block text-base font-medium mb-2">Địa chỉ chi tiết: <span class="text-red-500">*</span></label>
+                            <input type="text" id="address" name="address" value="<?php echo isset($_SESSION['shipping_info']) ? htmlspecialchars($_SESSION['shipping_info']['address']) : ($loggedIn && $customerInfo ? htmlspecialchars($customerInfo['diaChi']) : ''); ?>" required>
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Lưu thông tin</button>
+                    </form>
                 <?php endif; ?>
             </div>
 
@@ -131,133 +218,48 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                 <div class="product-list" id="product-list">
                     <!-- Products will be added dynamically -->
                 </div>
-                <div class="mt-4 flex justify-between">
-                    <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" onclick="window.location.href='index.php'">Hủy đơn</button>
+                <div class="mt-4 flex justify-end">
+                    <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 mr-2" onclick="window.location.href='index.php'">Hủy đơn</button>
                     <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="checkout()">Thanh Toán</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Address Input -->
-    <div id="addressModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeAddressModal()">×</span>
-            <h3 class="text-lg font-semibold mb-4">Cập nhật thông tin giao hàng</h3>
-            <form id="addressForm" method="POST" action="">
-                <div class="mb-4">
-                    <label for="fullName" class="block text-sm font-medium">Họ và tên:</label>
-                    <input type="text" id="fullName" name="fullName" value="<?php echo isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['fullName'] : ($loggedIn ? $customerInfo['tenKhachHang'] : ''); ?>" required>
-                </div>
-                <div class="mb-4">
-                    <label for="phone" class class="block text-sm font-medium">Số điện thoại:</label>
-                    <input type="tel" id="phone" name="phone" value="<?php echo isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['phone'] : ($loggedIn ? $customerInfo['soDT'] : ''); ?>" required>
-                </div>
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium">Email:</label>
-                    <input type="email" id="email" name="email" value="<?php echo isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['email'] : ''; ?>">
-                </div>
-                <div class="mb-4">
-                    <label for="city" class="block text-sm font-medium">Tỉnh/Thành phố:</label>
-                    <select id="city" name="city" required>
-                        <option value="">Chọn Tỉnh/Thành phố</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="district" class="block text-sm font-medium">Quận/Huyện:</label>
-                    <select id="district" name="district" required>
-                        <option value="">Chọn Quận/Huyện</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="ward" class="block text-sm font-medium">Xã/Phường:</label>
-                    <select id="ward" name="ward" required>
-                        <option value="">Chọn Xã/Phường</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="address" class="block text-sm font-medium">Địa chỉ chi tiết:</label>
-                    <input type="text" id="address" name="address" value="<?php echo isset($_SESSION['shipping_info']) ? $_SESSION['shipping_info']['address'] : ($loggedIn ? $customerInfo['diaChi'] : ''); ?>" required>
-                </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Lưu thông tin</button>
-            </form>
-        </div>
-    </div>
-
     <script>
         const isLoggedIn = <?php echo $loggedIn ? 'true' : 'false'; ?>;
         const storedAddress = "<?php echo isset($_SESSION['shipping_info']) 
-            ? $_SESSION['shipping_info']['address'] . ', ' . $_SESSION['shipping_info']['ward'] . ', ' . $_SESSION['shipping_info']['district'] . ', ' . $_SESSION['shipping_info']['city']
-            : ($loggedIn ? $customerInfo['diaChi'] : ''); ?>";
+            ? htmlspecialchars($_SESSION['shipping_info']['address'] . ', ' . $_SESSION['shipping_info']['ward'] . ', ' . $_SESSION['shipping_info']['district'] . ', ' . $_SESSION['shipping_info']['city'])
+            : ($loggedIn && $customerInfo && $customerInfo['diaChi'] ? htmlspecialchars($customerInfo['diaChi']) : ''); ?>";
 
-        function openAddressModal() {
-            if (!isLoggedIn) {
-                alert('Vui lòng đăng nhập để mua hàng!');
-                window.location.href = 'login.php';
-                return;
-            }
-            document.getElementById("addressModal").style.display = "block";
-            document.body.classList.add('no-scroll');
-            parseAndPreselectAddress(storedAddress);
-        }
-
-        function closeAddressModal() {
-            document.getElementById("addressModal").style.display = "none";
-            document.body.classList.remove('no-scroll');
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById("addressModal");
-            if (event.target == modal) {
-                closeAddressModal();
-            }
-        }
-
-        // Parse the stored address and preselect dropdowns
         async function parseAndPreselectAddress(address) {
             if (!address) {
-                console.log("No address provided");
-                await loadCities(); // Load cities without pre-selection
+                await loadCities();
                 return;
             }
 
-            console.log("Stored address:", address);
-
-            // Split the address into components
             const addressParts = address.split(',').map(part => part.trim());
-            console.log("Address parts:", addressParts);
-
-            // Handle both formats: "detailedAddress, ward, district, city" (4 parts) or "detailedAddress, district, city" (3 parts)
             let detailedAddress, ward, district, city;
 
-            if (addressParts.length === 4) {
-                // Format: "detailedAddress, ward, district, city"
+            if (addressParts.length >= 4) {
                 detailedAddress = addressParts[0];
                 ward = addressParts[1];
                 district = addressParts[2];
                 city = addressParts[3];
             } else if (addressParts.length === 3) {
-                // Format: "detailedAddress, district, city"
                 detailedAddress = addressParts[0];
-                ward = ''; // Ward is not provided
+                ward = '';
                 district = addressParts[1];
                 city = addressParts[2];
             } else {
-                console.log("Invalid address format, loading cities without pre-selection");
-                await loadCities();
-                return;
+                detailedAddress = addressParts[0] || '';
+                ward = district = city = '';
             }
 
-            console.log("Parsed - Detailed:", detailedAddress, "Ward:", ward, "District:", district, "City:", city);
-
-            // Populate the detailed address input
             document.getElementById('address').value = detailedAddress;
-
-            // Load cities and preselect
             await loadCities(city, district, ward);
         }
 
-        // Load address data from API
         async function loadCities(preselectCity = '', preselectDistrict = '', preselectWard = '') {
             const citySelect = document.getElementById('city');
             try {
@@ -277,13 +279,9 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                     }
                 });
 
-                console.log("Preselected city:", preselectCity, "City code:", cityCode);
-
-                // If a city was preselected, load districts
                 if (cityCode) {
                     await loadDistricts(cityCode, preselectDistrict, preselectWard);
                 } else {
-                    console.log("City not found in API data, loading districts without pre-selection");
                     document.getElementById('district').innerHTML = '<option value="">Chọn Quận/Huyện</option>';
                     document.getElementById('ward').innerHTML = '<option value="">Chọn Xã/Phường</option>';
                 }
@@ -311,13 +309,9 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                     }
                 });
 
-                console.log("Preselected district:", preselectDistrict, "District code:", districtCode);
-
-                // If a district was preselected, load wards
                 if (districtCode) {
                     await loadWards(districtCode, preselectWard);
                 } else {
-                    console.log("District not found in API data, loading wards without pre-selection");
                     document.getElementById('ward').innerHTML = '<option value="">Chọn Xã/Phường</option>';
                 }
             } catch (error) {
@@ -340,8 +334,6 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
                         option.selected = true;
                     }
                 });
-
-                console.log("Preselected ward:", preselectWard);
             } catch (error) {
                 console.error('Error loading wards:', error);
             }
@@ -366,57 +358,201 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
 
         document.addEventListener("DOMContentLoaded", function () {
             const productList = document.getElementById("product-list");
-            const checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
+            let checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
 
-            if (checkoutItems.length === 0) {
-                productList.innerHTML = '<p class="text-center text-gray-500">Không có sản phẩm nào được chọn.</p>';
-                document.querySelector(".bg-green-500").disabled = true;
-                return;
+            // Hàm cập nhật tổng tiền
+            function updateTotal() {
+                let total = 0;
+                checkoutItems.forEach(item => {
+                    total += item.price * item.quantity;
+                });
+                const totalDiv = document.querySelector(".total-div");
+                if (totalDiv) {
+                    totalDiv.innerHTML = `
+                        <span>Tổng cộng:</span>
+                        <span>${total.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</span>
+                    `;
+                }
+                sessionStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+                return total;
             }
 
-            let total = 0;
-            checkoutItems.forEach(item => {
-                const subtotal = item.price * item.quantity;
-                total += subtotal;
-                const productItem = document.createElement("div");
-                productItem.className = "flex items-center mb-4 pb-4 border-b";
-                productItem.innerHTML = `
-                    <img class="w-16 h-16 object-cover rounded mr-4" src="${item.image}" alt="${item.name}">
-                    <div class="flex-1">
-                        <p class="font-medium">${item.name}</p>
-                        <p class="text-sm text-gray-500">Còn lại: ${item.stock}</p>
-                        <p class="text-sm text-gray-500">Số lượng: ${item.quantity}</p>
-                    </div>
-                    <p class="font-medium">${(item.price * item.quantity).toLocaleString("vi-VN")}đ</p>
+            // Hàm hiển thị danh sách sản phẩm
+            function renderProducts() {
+                productList.innerHTML = '';
+                if (checkoutItems.length === 0) {
+                    productList.innerHTML = '<p class="text-center text-gray-500">Không có sản phẩm nào được chọn.</p>';
+                    document.querySelector(".bg-green-500").disabled = true;
+                    return;
+                }
+
+                document.querySelector(".bg-green-500").disabled = false;
+                checkoutItems.forEach((item, index) => {
+                    if (!item.idProduct || !item.price || !item.quantity || !item.name || !item.image || !item.stock) {
+                        productList.innerHTML = '<p class="text-center text-red-500">Dữ liệu sản phẩm không hợp lệ.</p>';
+                        document.querySelector(".bg-green-500").disabled = true;
+                        return;
+                    }
+                    const subtotal = item.price * item.quantity;
+                    const productItem = document.createElement("div");
+                    productItem.className = "flex items-center mb-4 pb-4 border-b";
+                    productItem.dataset.index = index;
+                    productItem.innerHTML = `
+                        <img class="w-16 h-16 object-cover rounded mr-4" src="${item.image}" alt="${item.name}">
+                        <div class="flex-1">
+                            <p class="font-medium">${item.name}</p>
+                            <p class="text-sm text-gray-500">Còn lại: ${item.stock}</p>
+                            <div class="quantity-container mt-2">
+                                <button class="decrease-btn" data-index="${index}">-</button>
+                                <input type="number" class="quantity" value="${item.quantity}" min="1" max="${item.stock}" data-index="${index}">
+                                <button class="increase-btn" data-index="${index}">+</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <p class="font-medium subtotal mr-4">${subtotal.toLocaleString("vi-VN")}đ</p>
+                            <button class="remove-btn" data-index="${index}" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    productList.appendChild(productItem);
+                });
+
+                const totalDiv = document.createElement("div");
+                totalDiv.className = "flex justify-between font-semibold mt-4 total-div";
+                totalDiv.innerHTML = `
+                    <span>Tổng cộng:</span>
+                    <span>${updateTotal().toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</span>
                 `;
-                productList.appendChild(productItem);
+                productList.appendChild(totalDiv);
+            }
+
+            // Xử lý tăng số lượng
+            productList.addEventListener("click", function(e) {
+                if (e.target.classList.contains("increase-btn")) {
+                    const index = parseInt(e.target.dataset.index);
+                    const item = checkoutItems[index];
+                    if (item.quantity < item.stock) {
+                        item.quantity += 1;
+                        sessionStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+                        renderProducts();
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Số lượng tối đa',
+                            text: `Số lượng tối đa cho "${item.name}" là ${item.stock}.`,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
             });
 
-            const totalDiv = document.createElement("div");
-            totalDiv.className = "flex justify-between font-semibold mt-4";
-            totalDiv.innerHTML = `
-                <span>Tổng cộng:</span>
-                <span>${total.toLocaleString("vi-VN")}đ</span>
-            `;
-            productList.appendChild(totalDiv);
+            // Xử lý giảm số lượng
+            productList.addEventListener("click", function(e) {
+                if (e.target.classList.contains("decrease-btn")) {
+                    const index = parseInt(e.target.dataset.index);
+                    const item = checkoutItems[index];
+                    if (item.quantity > 1) {
+                        item.quantity -= 1;
+                        sessionStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+                        renderProducts();
+                    }
+                }
+            });
+
+            // Xử lý nhập số lượng trực tiếp
+            productList.addEventListener("input", function(e) {
+                if (e.target.classList.contains("quantity")) {
+                    const index = parseInt(e.target.dataset.index);
+                    const item = checkoutItems[index];
+                    let value = parseInt(e.target.value);
+
+                    if (isNaN(value) || value < 1) {
+                        value = 1;
+                        e.target.value = value;
+                    } else if (value > item.stock) {
+                        value = item.stock;
+                        e.target.value = value;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Số lượng tối đa',
+                            text: `Số lượng tối đa cho "${item.name}" là ${item.stock}.`,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+
+                    item.quantity = value;
+                    sessionStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+                    renderProducts();
+                }
+            });
+
+            // Xử lý xóa sản phẩm
+            productList.addEventListener("click", function(e) {
+                if (e.target.closest(".remove-btn")) {
+                    const index = parseInt(e.target.closest(".remove-btn").dataset.index);
+                    const item = checkoutItems[index];
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Xóa sản phẩm',
+                        text: `Bạn có chắc muốn xóa "${item.name}" khỏi đơn hàng?`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            checkoutItems.splice(index, 1);
+                            sessionStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+                            renderProducts();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Đã xóa',
+                                text: `"${item.name}" đã được xóa khỏi đơn hàng.`,
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Khởi tạo danh sách sản phẩm
+            renderProducts();
+            parseAndPreselectAddress(storedAddress);
         });
 
         function checkout() {
             if (!isLoggedIn) {
-                alert('Vui lòng đăng nhập để mua hàng!');
-                window.location.href = 'login.php';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa đăng nhập!',
+                    text: 'Vui lòng đăng nhập để thanh toán.',
+                    confirmButtonText: 'Đăng nhập',
+                    showCancelButton: true,
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.php';
+                    }
+                });
                 return;
             }
 
-            if (!<?php echo isset($_SESSION['shipping_info']) ? 'true' : 'false'; ?>) {
-                alert('Vui lòng nhập thông tin giao hàng trước khi thanh toán!');
-                openAddressModal();
+            if (!<?php echo isset($_SESSION['shipping_info']) || !$missingInfo ? 'true' : 'false'; ?>) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin giao hàng!',
+                    text: 'Vui lòng cập nhật thông tin giao hàng trước khi thanh toán.',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
             const checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
             if (checkoutItems.length === 0) {
-                alert('Không có sản phẩm nào để thanh toán!');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Không có sản phẩm!',
+                    text: 'Vui lòng chọn sản phẩm để thanh toán.',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
@@ -448,9 +584,26 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
         $items = json_decode($_POST['items'] ?? '[]', true);
         $shippingInfo = $_SESSION['shipping_info'] ?? null;
 
-        if (empty($items) || empty($shippingInfo)) {
-            echo "<script>alert('Thông tin không đầy đủ'); window.history.back();</script>";
+        if (empty($items)) {
+            echo "<script>Swal.fire({icon: 'error', title: 'Lỗi', text: 'Không có sản phẩm để thanh toán', confirmButtonText: 'OK'}).then(() => { window.history.back(); });</script>";
             exit;
+        }
+
+        if (empty($shippingInfo) && $missingInfo) {
+            echo "<script>Swal.fire({icon: 'error', title: 'Lỗi', text: 'Thông tin giao hàng không đầy đủ', confirmButtonText: 'OK'}).then(() => { window.history.back(); });</script>";
+            exit;
+        }
+
+        if (empty($shippingInfo) && !$missingInfo) {
+            $shippingInfo = [
+                'fullName' => $customerInfo['tenKhachHang'],
+                'phone' => $customerInfo['soDT'],
+                'email' => $customerInfo['email'] ?? '',
+                'address' => '',
+                'ward' => '',
+                'district' => '',
+                'city' => $customerInfo['diaChi']
+            ];
         }
 
         $result = $cart->process_checkout($maTaiKhoan, $items, $shippingInfo);
@@ -459,14 +612,22 @@ if ($loggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fullName
             unset($_SESSION['shipping_info']);
             echo "<script>
                 sessionStorage.removeItem('checkoutItems');
-                alert('Đặt hàng thành công');
-                window.location.href = 'index.php';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đặt hàng thành công',
+                    text: 'Cảm ơn bạn đã mua hàng!',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'index.php';
+                });
             </script>";
         } else {
-            echo "<script>alert('Có lỗi xảy ra: " . htmlspecialchars($result['message']) . "'); window.history.back();</script>";
+            $errorMessage = htmlspecialchars($result['message']);
+            echo "<script>Swal.fire({icon: 'error', title: 'Lỗi', text: '$errorMessage', confirmButtonText: 'OK'}).then(() => { window.history.back(); });</script>";
         }
         exit;
     }
     ?>
+
 </body>
 </html>

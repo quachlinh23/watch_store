@@ -85,7 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         data-price="<?= htmlspecialchars($item['giaban']) ?>">
                         <td><input type="checkbox" class="select-item" checked></td>
                         <td class="product-info">
-                            <img src="admin/<?= htmlspecialchars($item['hinhAnh']) ?>" alt="Sản phẩm" class="product-img">
+                            <a href="details.php?id=<?= urlencode($item['maSanPham']) ?>">
+                                <img src="admin/<?= htmlspecialchars($item['hinhAnh']) ?>" alt="Sản phẩm" class="product-img">
+                            </a>
                             <span class="product-name"><?= htmlspecialchars($item['tenSanPham']) ?></span>
                         </td>
                         <td class="price"><?= number_format($item['giaban'], 0, ',', '.') ?> đ</td>
@@ -411,32 +413,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             // Khởi tạo tổng tiền ban đầu
             handleItemCheckboxChange();
         });
-    </script>
 
-    <script>
         document.querySelector(".checkout-btn").addEventListener("click", function () {
             const selectedItems = [];
+            let hasError = false;
+            let errorMessage = '';
+
+            // Thu thập các sản phẩm được chọn
             document.querySelectorAll(".select-item:checked").forEach(checkbox => {
                 const row = checkbox.closest("tr");
-                selectedItems.push({
-                    idProduct: row.getAttribute("data-product-id"),
-                    quantity: parseInt(row.querySelector(".quantity").value),
-                    price: parseFloat(row.getAttribute("data-price")),
-                    name: row.querySelector(".product-name").textContent,
-                    image: row.querySelector(".product-img").src,
-                    stock: parseInt(row.getAttribute("data-stock"))
-                });
+                const quantity = parseInt(row.querySelector(".quantity").value);
+                const stock = parseInt(row.getAttribute("data-stock"));
+                const productName = row.querySelector(".product-name").textContent;
+
+                // Kiểm tra số lượng mua so với số lượng tồn
+                if (quantity > stock) {
+                    hasError = true;
+                    errorMessage += `Sản phẩm "${productName}" chỉ còn ${stock} sản phẩm, bạn đã chọn ${quantity}.\n`;
+                } else {
+                    selectedItems.push({
+                        idProduct: row.getAttribute("data-product-id"),
+                        quantity: quantity,
+                        price: parseFloat(row.getAttribute("data-price")),
+                        name: productName,
+                        image: row.querySelector(".product-img").src,
+                        stock: stock
+                    });
+                }
             });
 
-            if (selectedItems.length === 0) {
+            // Kiểm tra nếu không có sản phẩm nào được chọn
+            if (selectedItems.length === 0 && !hasError) {
                 alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+                return;
+            }
+
+            // Hiển thị lỗi nếu có sản phẩm vượt quá số lượng tồn
+            if (hasError) {
+                alert(errorMessage);
                 return;
             }
 
             // Lưu danh sách sản phẩm vào sessionStorage
             sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
 
-            // Chuyển hướng sang buynow.php
+            // Chuyển hướng sang InvoiceByCart.php
             window.location.href = "InvoiceByCart.php";
         });
     </script>

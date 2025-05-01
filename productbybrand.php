@@ -119,7 +119,7 @@ ob_end_flush();
             <div class="btn_filter">
                 <button id="btnOpenFilter">
                     <span class="icon-container">
-                        <i class="fas fa-filter"></i> 
+                        <i class="fas fa-filter"></i>
                         <i class="fas fa-check-circle"></i>
                     </span>
                     Lọc
@@ -189,7 +189,7 @@ ob_end_flush();
                     $firstSentence = ($dotPos !== false) ? substr($mota, 0, $dotPos + 1) : "Thông tin này chưa được cập nhật.";
                     echo '<span style="font-size: 17px;">' . $firstSentence . '...</span>';
                 ?>
-                <span class="extend" id="extend" style="cursor: pointer;">Xem thêm <i id="toggle-icon" class="fas fa-chevron-down"></i></span>
+                <span class="extend" id="extend" style="cursor: pointer; margin-left: 30px;">Xem thêm <i id="toggle-icon" class="fas fa-chevron-down"></i></span>
             </span>
             <div class="info" id="info" style="display: none;">
                 <ul class="info-list">

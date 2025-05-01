@@ -161,7 +161,7 @@ class Page_user {
             throw new Exception("Lỗi xử lý tìm kiếm: " . $e->getMessage());
         }
     }
-
+    
     //Hàm load danh sách các sản phẩm lên trang index
     public function loadProduct($brandId){
         $brandId = intval($brandId);

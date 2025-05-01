@@ -10,12 +10,12 @@ $brand = new brand();
 $product = new product();
 $rating = new Rating();
 $id = $_GET['id'];
-$productInfo = $product->getProductById($id); // Thông tin sản phẩm
+$productInfo = $product->getProductById($id);
 $formatted_price = number_format($productInfo['giaban'], 0, ',', '.');
 $userId = $_SESSION['customer_id'] ?? null;
-$ratings = $rating->getRatingsWithCustomerInfo($id); // Danh sách đánh giá
+$ratings = $rating->getRatingsWithCustomerInfo($id);
 $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-// Kiểm tra xem người dùng đã đánh giá chưa
+$specs = $product->getSpecs($id);
 $userHasRated = false;
 $userRating = null;
 if ($userId) {
@@ -137,7 +137,7 @@ if (isset($_POST['add_to_cart'])) {
     <title>Watch Store</title>
     <link rel="stylesheet" href="css/head.css">
     <link rel="stylesheet" href="css/footer.css">
-    <link rel="stylesheet" href="css/details_1.css">
+    <link rel="stylesheet" href="css/details.css">
     <script src="script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="js/details.js"></script>
@@ -155,6 +155,70 @@ if (isset($_POST['add_to_cart'])) {
         .review-stars .far.fa-star {
             color: #ccc;
         }
+
+        .step-title {
+            font-size: 22px;
+            color: #444;
+            margin-top: 20px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .size-image {
+            width: 100%;
+            max-width: 350px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .size-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .size-table th, .size-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .size-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .size-table tr:hover {
+            background-color: #e1e1e1;
+        }
+
+        .contact-title {
+            font-size: 18px;
+            color: #444;
+        }
+
+        .contact-link {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -164,7 +228,7 @@ if (isset($_POST['add_to_cart'])) {
             <ul class="breadcrumb">
                 <li class="breadcrumb__item"><a href="index.php"><i class="fas fa-home home-icon"></i></a></li>
                 <pre class="items">   >   </pre>
-                <li class="breadcrumb__item product-name">Đồng hồ casio</li>
+                <li class="breadcrumb__item product-name">Đồng hồ <?php echo $productInfo['tenThuongHieu']?></li>
             </ul>
         </div>
         <!-- Chi tiết sản phẩm -->
@@ -196,6 +260,7 @@ if (isset($_POST['add_to_cart'])) {
                             foreach ($ImgSub as $img) {
                                 echo '<img class="thumb" src="admin/' . htmlspecialchars($img) . '" onclick="changeImage(this)">';
                             }
+                            echo '<img class="thumb" src="admin/' . htmlspecialchars($productInfo['hinhAnh']) . '" onclick="changeImage(this)">';
                         } else {
                             echo '<img class="thumb" src="admin/' . htmlspecialchars($productInfo['hinhAnh']) . '" onclick="changeImage(this)">';
                         }
@@ -244,20 +309,103 @@ if (isset($_POST['add_to_cart'])) {
         </div>
         <!-- Tabs điều hướng -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab('specs')">📌 Thông số</button>
-            <button class="tab-btn" onclick="openTab('reviews')">⭐ Đánh giá</button>
+            <button class="tab-btn active" onclick="openTab('specs')">Thông số</button>
+            <button class="tab-btn" onclick="openTab('size')">Hướng dẫn chọn size</button>
+            <button class="tab-btn" onclick="openTab('reviews')">Đánh giá</button>
         </div>
 
         <!-- Nội dung tab -->
         <div class="tab-content active" id="specs">
             <h3>Thông số kỹ thuật</h3>
             <ul>
-                <li>Chất liệu: Vải lưới thoáng khí</li>
-                <li>Đế: Cao su bền</li>
-                <li>Trọng lượng: 250g</li>
-                <li>Màu sắc: Trắng / Đen / Xanh</li>
+                <?php if (!empty($specs)): ?>
+                    <?php if (!empty($specs['loaiDay'])): ?>
+                        <li>Loại dây: <?= htmlspecialchars($specs['loaiDay']) ?></li>
+                        <hr>
+                    <?php endif; ?>
+                    <?php if (!empty($specs['pin'])): ?>
+                        <li>Pin: <?= htmlspecialchars($specs['pin']) ?></li>
+                        <hr>
+                    <?php endif; ?>
+                    <?php if (!empty($specs['matKinh'])): ?>
+                        <li>Mặt kính: <?= htmlspecialchars($specs['matKinh']) ?></li>
+                        <hr>
+                    <?php endif; ?>
+                    <?php if (!empty($specs['chongNuoc'])): ?>
+                        <li>Chống nước: <?= htmlspecialchars($specs['chongNuoc']) ?></li>
+                        <hr>
+                    <?php endif; ?>
+                    <?php if (!empty($specs['chucNang'])): ?>
+                        <li>Chức năng: <?= htmlspecialchars($specs['chucNang']) ?></li>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <li>Không có thông số kỹ thuật.</li>
+                <?php endif; ?>
             </ul>
         </div>
+
+        <div class="tab-content" id="size">
+            <h3 class="heading">Hướng dẫn chọn size đồng hồ</h3>
+
+            <h4 class="step-title">Bước 1: Đo size tay</h4>
+            <p class="description">Để chọn được size đồng hồ phù hợp, bạn cần đo vòng tay của mình. Dưới đây là bảng tham chiếu size đồng hồ tương ứng với vòng tay của bạn.</p>
+            <img src="images/huongdan.png" alt="Hình ảnh đo vòng tay" class="size-image">
+
+            <h4 class="step-title">Bước 2: Tham chiếu size đồng hồ phù hợp</h4>
+            <table class="size-table">
+                <thead>
+                    <tr>
+                        <th class="table-header">Vòng tay (cm)</th>
+                        <th class="table-header">Size đồng hồ phù hợp (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>13cm</td>
+                        <td>26cm - 33cm</td>
+                    </tr>
+                    <tr>
+                        <td>14cm</td>
+                        <td>28cm - 35cm</td>
+                    </tr>
+                    <tr>
+                        <td>15cm</td>
+                        <td>30cm - 38cm</td>
+                    </tr>
+                    <tr>
+                        <td>16cm</td>
+                        <td>32cm - 40cm</td>
+                    </tr>
+                    <tr>
+                        <td>17cm</td>
+                        <td>34cm - 43cm</td>
+                    </tr>
+                    <tr>
+                        <td>18cm</td>
+                        <td>36cm - 45cm</td>
+                    </tr>
+                    <tr>
+                        <td>19cm</td>
+                        <td>38cm - 48cm</td>
+                    </tr>
+                    <tr>
+                        <td>20cm</td>
+                        <td>40cm - 50cm</td>
+                    </tr>
+                    <tr>
+                        <td>21cm</td>
+                        <td>42cm - 53cm</td>
+                    </tr>
+                    <tr>
+                        <td>22cm</td>
+                        <td>44cm - 55cm</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4 class="contact-title" style="margin-top: 20px;">Hoặc liên hệ với WatchStore qua số hotline <a href="tel:0794628540" class="contact-link">0794628540</a></h4>
+        </div>
+
+        
 
         <div class="tab-content" id="reviews">
             <h3>Đánh giá sản phẩm</h3>
@@ -353,7 +501,7 @@ if (isset($_POST['add_to_cart'])) {
             </div>
         </div>
     </div>
-
+    
     <section class="committion">
         <div class="img_1">
             <img src="images/real_1.png" alt="">

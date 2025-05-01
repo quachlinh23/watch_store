@@ -29,11 +29,27 @@ if (isset($_POST['action']) && $userId) {
         echo json_encode($result);
         exit;
     } elseif ($_POST['action'] === 'request_return') {
+        // Get completion date for THIS specific invoice
+        $completionDate = $cart->getNgayHoanThanh($maPX);
+        if ($completionDate) {
+            $completionTimestamp = strtotime($completionDate);
+            $currentTimestamp = time();
+            $daysDiff = floor(($currentTimestamp - $completionTimestamp) / (60 * 60 * 24));
+            
+            if ($daysDiff > 7) {
+                echo json_encode(['success' => false, 'message' => 'Đã quá thời hạn 7 ngày để yêu cầu trả hàng']);
+                exit;
+            }
+        } else {
+            // Invoice doesn't have completion date (maybe not completed yet)
+            echo json_encode(['success' => false, 'message' => 'Đơn hàng chưa được hoàn thành']);
+            exit;
+        }
+        
         $result = $cart->requestReturn($maPX);
         echo json_encode($result);
         exit;
     }
-
     echo json_encode(['success' => false, 'message' => 'Hành động không hợp lệ']);
     exit;
 }
@@ -120,6 +136,15 @@ if (isset($_POST['action']) && $userId) {
                     </thead>
                     <tbody id="invoiceTableBody">
                         <?php foreach ($invoices as $index => $invoice): ?>
+                            <?php
+                            $isReturnable = false;
+                            if ($invoice['trangThai'] == 3 && isset($invoice['ngayhoanThanh'])) {
+                                $completionDate = strtotime($invoice['ngayhoanThanh']);
+                                $currentDate = time();
+                                $daysDiff = floor(($currentDate - $completionDate) / (60 * 60 * 24));
+                                $isReturnable = $daysDiff <= 7;
+                            }
+                            ?>
                             <tr data-mapx="<?php echo $invoice['maphieuxuat']; ?>" data-status="<?php echo $invoice['trangThai']; ?>">
                                 <td><?php echo $index + 1; ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($invoice['ngayLap'])); ?></td>
@@ -151,11 +176,10 @@ if (isset($_POST['action']) && $userId) {
                                             onclick="markAsReceived(<?php echo $invoice['maphieuxuat']; ?>)">
                                             Đã nhận hàng
                                         </button>
-                                        
                                     <?php elseif ($invoice['trangThai'] == 3): ?>
-                                        <button class="btn-return"
+                                        <button class="btn-return" <?php echo $isReturnable ? '' : 'disabled'; ?>
                                             onclick="requestReturn(<?php echo $invoice['maphieuxuat']; ?>)">
-                                            Yêu cầu trả hàng
+                                            <?php echo $isReturnable ? 'Yêu cầu trả hàng' : 'Hết thời hạn trả hàng'; ?>
                                         </button>
                                     <?php else: ?>
                                         <button class="btn-cancel" disabled>
@@ -295,7 +319,6 @@ if (isset($_POST['action']) && $userId) {
                     window.location.reload();
                 }
             })
-            
             .catch(error => {
                 alert('Đã xảy ra lỗi: ' + error.message);
             });
@@ -359,8 +382,8 @@ if (isset($_POST['action']) && $userId) {
                         `;
                         filterInvoices(document.querySelector('.tab-btn.active').getAttribute('data-tab') || 'processing');
                     }
+                    window.location.reload();
                 }
-                window.location.reload();
             })
             .catch(error => {
                 alert('Đã xảy ra lỗi: ' + error.message);
@@ -384,6 +407,14 @@ if (isset($_POST['action']) && $userId) {
             }
 
             filteredInvoices.forEach((invoice, index) => {
+                let isReturnable = false;
+                if (invoice.trangThai === 3 && invoice.ngayhoanThanh) {
+                    const completionDate = new Date(invoice.ngayhoanThanh);
+                    const currentDate = new Date();
+                    const daysDiff = Math.floor((currentDate - completionDate) / (1000 * 60 * 60 * 24));
+                    isReturnable = daysDiff <= 7;
+                }
+
                 const row = document.createElement('tr');
                 row.setAttribute('data-mapx', invoice.maphieuxuat);
                 row.setAttribute('data-status', invoice.trangThai);
@@ -399,7 +430,7 @@ if (isset($_POST['action']) && $userId) {
                         <button class="btn-view" onclick='showInvoiceDetails(${JSON.stringify(invoice)})'>Xem chi tiết</button>
                         ${invoice.trangThai === 0 ? `<button class="btn-cancel" onclick="cancelInvoice(${invoice.maphieuxuat})">Hủy đơn</button>` :
                         invoice.trangThai === 1 ? `<button class="btn-received" onclick="markAsReceived(${invoice.maphieuxuat})">Đã nhận hàng</button>` :
-                        invoice.trangThai === 3 ? `<button class="btn-return" onclick="requestReturn(${invoice.maphieuxuat})">Yêu cầu trả hàng</button>` :
+                        invoice.trangThai === 3 ? `<button class="btn-return" ${isReturnable ? '' : 'disabled'} onclick="requestReturn(${invoice.maphieuxuat})">${isReturnable ? 'Yêu cầu trả hàng' : 'Hết thời hạn trả hàng'}</button>` :
                         `<button class="btn-cancel" disabled>${invoice.trangThai === 2 ? 'Đã hủy' : 'Đã yêu cầu trả hàng'}</button>`}
                     </td>
                 `;

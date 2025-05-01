@@ -23,9 +23,9 @@
             <div class="footer-column">
                 <h3><i class="fa fa-info-circle"></i> Thông tin khác</h3>
                 <ul>
-                    <li><a href="contact.php">Chính sách bảo hành</a></li>
+                    <li><a href="policy.php">Chính sách bảo hành</a></li>
                     <li><a href="contact.php">Điều khoản sử dụng</a></li>
-                    <li><a href="contact.php">Hướng dẫn mua hàng</a></li>
+                    <li><a href="process.php">Hướng dẫn mua hàng</a></li>
                     <li><a href="contact.php">Liên hệ</a></li>
                 </ul>
             </div>
