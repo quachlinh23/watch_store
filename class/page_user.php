@@ -76,8 +76,8 @@ class Page_user {
         }
         return $keyword;
     }
-
-
+    
+    //Tìm kiếm sản phẩm theo từ khóa
     public function SearchProductsByKey($keyword = '', $page = 1, $limit = 10, $filters = []) {
         try {
             $offset = ($page - 1) * $limit;

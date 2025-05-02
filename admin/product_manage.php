@@ -6,7 +6,6 @@
     $pr = new product();
     $br = new brand();
     $category = new category();
-   
 
     // Xử lý thêm sản phẩm
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && !isset($_POST['product_id'])) {
@@ -31,7 +30,6 @@
             echo "<script>alert('$update_product'); window.location.href = window.location.pathname;</script>";
         }
     }
-
 
     $search = isset($_POST['searchdata']) ? htmlspecialchars(trim($_POST['searchdata']), ENT_QUOTES, 'UTF-8') : "";
     $resultsearch = null;
@@ -85,6 +83,107 @@
         .error { color: red; font-size: 12px; display: none; }
         #selectImagesBtn, #selectImagesBtnEdit { padding: 5px 10px; background: #007bff; color: white; border: none; cursor: pointer; }
         #selectImagesBtn:hover, #selectImagesBtnEdit:hover { background: #0056b3; }
+
+        /* Overlay nền mờ */
+        .modal-spec {
+            display: none; /* Hiển thị bằng JS khi cần */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hộp nội dung chính giữa màn hình */
+        .modal-content-spec {
+            background-color: #fff;
+            margin: 80px auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Tiêu đề */
+        .modal-content-spec h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        /* Nút đóng */
+        .modal-content-spec .close-spec {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* Nhóm input */
+        .spec-input {
+            margin-bottom: 15px;
+        }
+
+        .spec-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #444;
+        }
+
+        .spec-input input,
+        .spec-input textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .spec-input textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Nút lưu */
+        .button-thongso {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .button-thongso button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-thongso button:hover {
+            background-color: #218838;
+        }
+
+        /* Animation mở */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
     </style>
     <script>
         window.onload = function () {
@@ -122,7 +221,7 @@
                             <span class="error" id="erroranh_add"></span>
                         </div>
                         <div class="form-group">
-                            <label for="product_images_add">Ảnh phụ (tối đa 3):</label>
+                            <label for="product_images_add">Ảnh phụ :</label>
                             <button type="button" id="selectImagesBtn" onclick="document.getElementById('product_images_add').click();">Chọn ảnh phụ</button>
                             <input type="file" id="product_images_add" accept="image/*" style="display: none;" onchange="previewImages(this, 'image-preview-add')" />
                             <div id="image-preview-add" class="image-preview-container"></div>
@@ -197,7 +296,7 @@
                             <span class="error" id="erroranh_edit"></span>
                         </div>
                         <div class="form-group">
-                            <label for="product_images_edit">Ảnh phụ (tối đa 3):</label>
+                            <label for="product_images_edit">Ảnh phụ:</label>
                             <button type="button" id="selectImagesBtnEdit" onclick="document.getElementById('product_images_edit').click();">Chọn ảnh phụ</button>
                             <input type="file" id="product_images_edit" accept="image/*" style="display: none;" onchange="previewImageEdit(this)" />
                             <div id="image-preview-edit" class="image-preview-container"></div>
@@ -245,14 +344,16 @@
                 </div>
                 <div class="form-actions">
                     <button type="button" class="cancel">Hủy</button>
-                    <button type="submit" name="submit" value="Lưu lại" id="submit-edit-btn" onclick="submitEdit()">Lưu lại</button>
+                    <input type="submit" name="submit" value="Lưu lại" id="submit-edit-btn" onclick="submitEdit()">
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Thông số -->
     <div id="specModal" class="modal-spec">
         <div class="modal-content-spec">
-            <span class="close">×</span>
+            <span class="close-spec">×</span>
             <h2>Quản lý thông số sản phẩm</h2>
             <form id="specForm" method="POST" action="">
                 <input type="hidden" name="maSanPham" id="maSanPham">
@@ -282,80 +383,38 @@
             </form>
         </div>
     </div>
+
     <!-- Danh sách sản phẩm -->
     <div class="container">
-    <h2>Quản lý sản phẩm</h2>
-    <div class="container">
-        <div class="search_product">
-            <form method="POST" class="search-input" >
-                <input type="text" name="searchdata" id="searchdata" placeholder="Tìm kiếm theo tên sản phẩm hoặc loại, thương hiệu" value="<?php echo htmlspecialchars($search); ?>">
-                <button type="submit" name="Search"><i class="fa fa-search" ></i> Tìm kiếm</button>
-            </form>
+        <h2>Quản lý sản phẩm</h2>
+        <div class="container">
+            <div class="search_product">
+                <form method="POST" class="search-input" >
+                    <input type="text" name="searchdata" id="searchdata" placeholder="Tìm kiếm theo tên sản phẩm hoặc loại, thương hiệu" value="<?php echo htmlspecialchars($search); ?>">
+                    <button type="submit" name="Search"><i class="fa fa-search" ></i> Tìm kiếm</button>
+                </form>
+            </div>
+            <button class="btn-add" id="openAddModal"><i class="fa-solid fa-plus"></i> Thêm</button>
         </div>
-        <button class="btn-add" id="openAddModal"><i class="fa-solid fa-plus"></i> Thêm</button>
-    </div>
-    <div class="table-container">
-        <table class="table_slider">
-            <thead>
-                <tr>
-                    <th style="width: 5%;">M.SP</th>
-                    <th style="width: 25%;">Tên sản phẩm</th>
-                    <th style="width: 20%;">Loại sản phẩm</th>
-                    <th style="width: 15%;">Thương hiệu</th>
-                    <th style="width: 15%;">Ảnh</th>
-                    <th style="width: 15%;">Trạng thái</th>
-                    <th style="width: 5%;">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Kiểm tra nếu có kết quả tìm kiếm
-                if ($resultsearch !== null && !empty($resultsearch)) {
-                    $i = 0;
-                    foreach ($resultsearch as $result) {
-                        print_r($result);
-                        $i++;
-                        // Lấy ảnh phụ
-                        $subImagesResult = $pr->getSubImages($result['maSanPham']);
-                        $subImages = [];
-                        if ($subImagesResult) {
-                            while ($subRow = $subImagesResult->fetch_assoc()) {
-                                $subImages[] = $subRow['hinhAnh'];
-                            }
-                        }
-                        $subImagesStr = implode(',', $subImages);
-
-                        echo "<tr class='table_row'>";
-                        echo "<td>{$i}</td>";
-                        echo "<td>" . htmlspecialchars($result['tenSanPham']) . "</td>";
-                        echo "<td>" . htmlspecialchars($result['tenLoai']) . "</td>";
-                        echo "<td>" . htmlspecialchars($result['tenThuongHieu']) . "</td>";
-                        echo "<td><img src='" . htmlspecialchars($result['hinhAnh']) . "' alt='' class='product_image' style='max-width: 100px;'></td>";
-                        echo "<td>" . ($result['trangthai'] == 1 ? "Còn kinh doanh" : "Ngừng kinh doanh") . "</td>";
-                        echo '<td class="btn-container">
-                                <div class="btn-action btn-edit"
-                                    data-id="' . htmlspecialchars($result['maSanPham']) . '">
-                                    <i class="fa-solid fa-pen"></i>
-                                </div>
-                                <div class="btn-action btn-spec" data-id="' . htmlspecialchars($result['maSanPham']) . '" title="Quản lý thông số">
-                                    <i class="fa-solid fa-cog"></i>
-                                </div>
-                                <form action="" method="POST" class="status-form">
-                                    <input type="hidden" name="id" value="' . htmlspecialchars($result['maSanPham']) . '">
-                                    <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
-                                    <button style="background-color:green" type="submit" class="btn-action btn-status" title="Đổi trạng thái">
-                                        <i class="fa-solid fa-rotate"></i>
-                                    </button>
-                                </form>
-                            </td>';
-                        echo "</tr>";
-                    }
-                } else {
-                    // Nếu không có tìm kiếm hoặc không có kết quả, hiển thị toàn bộ sản phẩm
-                    $prList = $pr->show();
-                    if ($prList && $prList->num_rows > 0) {
+        <div class="table-container">
+            <table class="table_slider">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">M.SP</th>
+                        <th style="width: 25%;">Tên sản phẩm</th>
+                        <th style="width: 20%;">Loại sản phẩm</th>
+                        <th style="width: 15%;">Thương hiệu</th>
+                        <th style="width: 15%;">Ảnh</th>
+                        <th style="width: 15%;">Trạng thái</th>
+                        <th style="width: 5%;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Kiểm tra nếu có kết quả tìm kiếm
+                    if ($resultsearch !== null && !empty($resultsearch)) {
                         $i = 0;
-                        while ($result = $prList->fetch_assoc()) {
+                        foreach ($resultsearch as $result) {
                             $i++;
                             // Lấy ảnh phụ
                             $subImagesResult = $pr->getSubImages($result['maSanPham']);
@@ -393,23 +452,63 @@
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='7'>Không có dữ liệu sản phẩm</td></tr>";
-                    }
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+                        // Nếu không có tìm kiếm hoặc không có kết quả, hiển thị toàn bộ sản phẩm
+                        $prList = $pr->show();
+                        if ($prList && $prList->num_rows > 0) {
+                            $i = 0;
+                            while ($result = $prList->fetch_assoc()) {
+                                $i++;
+                                // Lấy ảnh phụ
+                                $subImagesResult = $pr->getSubImages($result['maSanPham']);
+                                $subImages = [];
+                                if ($subImagesResult) {
+                                    while ($subRow = $subImagesResult->fetch_assoc()) {
+                                        $subImages[] = $subRow['hinhAnh'];
+                                    }
+                                }
+                                $subImagesStr = implode(',', $subImages);
 
+                                echo "<tr class='table_row'>";
+                                echo "<td>{$i}</td>";
+                                echo "<td>" . htmlspecialchars($result['tenSanPham']) . "</td>";
+                                echo "<td>" . htmlspecialchars($result['tenLoai']) . "</td>";
+                                echo "<td>" . htmlspecialchars($result['tenThuongHieu']) . "</td>";
+                                echo "<td><img src='" . htmlspecialchars($result['hinhAnh']) . "' alt='' class='product_image' style='max-width: 100px;'></td>";
+                                echo "<td>" . ($result['trangthai'] == 1 ? "Còn kinh doanh" : "Ngừng kinh doanh") . "</td>";
+                                echo '<td class="btn-container">
+                                        <div class="btn-action btn-edit"
+                                            data-id="' . htmlspecialchars($result['maSanPham']) . '">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </div>
+                                        <div class="btn-action btn-spec" data-id="' . htmlspecialchars($result['maSanPham']) . '" title="Quản lý thông số">
+                                            <i class="fa-solid fa-cog"></i>
+                                        </div>
+                                        <form action="" method="POST" class="status-form">
+                                            <input type="hidden" name="id" value="' . htmlspecialchars($result['maSanPham']) . '">
+                                            <input type="hidden" name="trangThai" value="' . ($result['trangthai'] == 1 ? 1 : 0) . '">
+                                            <button style="background-color:green" type="submit" class="btn-action btn-status" title="Đổi trạng thái">
+                                                <i class="fa-solid fa-rotate"></i>
+                                            </button>
+                                        </form>
+                                    </td>';
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='7'>Không có dữ liệu sản phẩm</td></tr>";
+                        }
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
     <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let selectedFilesAdd = [];
         let selectedFilesEdit = [];
         let existingImagesEdit = [];
-
-
 
         document.querySelectorAll('.btn-action.btn-edit').forEach(element => {
             element.addEventListener('click', function() {
@@ -437,218 +536,204 @@
         }
 
         function previewImageEdit(input) {
-        const previewContainer = document.getElementById('image-preview-edit');
-        const hiddenContainer = document.getElementById('hidden-images-edit');
-        const maxImages = 3;
+            const previewContainer = document.getElementById('image-preview-edit');
+            const hiddenContainer = document.getElementById('hidden-images-edit');
+            const maxImages = 3;
 
-        const currentImageCount = previewContainer.querySelectorAll('.image-preview-wrapper').length;
-        const newImageCount = input.files.length;
+            const currentImageCount = previewContainer.querySelectorAll('.image-preview-wrapper').length;
+            const newImageCount = input.files.length;
 
-        // if (currentImageCount + newImageCount + existingImagesEdit.length > maxImages) {
-        //     alert('Chỉ được chọn tối đa 3 ảnh phụ! Hiện tại đã có ' + (currentImageCount + existingImagesEdit.length) + ' ảnh.');
-        //     input.value = '';
-        //     return;
-        // }
+            Array.from(input.files).forEach(file => {
+                selectedFilesAdd.push(file);
 
-        Array.from(input.files).forEach(file => {
-            selectedFilesAdd.push(file);
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // Tạo wrapper
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'image-preview-wrapper';
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'inline-block';
+                    wrapper.style.margin = '5px';
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // Tạo wrapper
-                const wrapper = document.createElement('div');
-                wrapper.className = 'image-preview-wrapper';
-                wrapper.style.position = 'relative';
-                wrapper.style.display = 'inline-block';
-                wrapper.style.margin = '5px';
+                    // Ảnh
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    img.style.width = '80px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '1px solid #ccc';
+                    img.style.borderRadius = '4px';
 
-                // Ảnh
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = 'image-preview';
-                img.style.width = '80px';
-                img.style.height = '80px';
-                img.style.objectFit = 'cover';
-                img.style.border = '1px solid #ccc';
-                img.style.borderRadius = '4px';
+                    // Nút xoá
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '×';
+                    removeBtn.type = 'button';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '0';
+                    removeBtn.style.right = '0';
+                    removeBtn.style.background = 'red';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.borderRadius = '0 0 0 5px';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.style.padding = '2px 6px';
+                    removeBtn.style.fontSize = '16px';
 
-                // Nút xoá
-                const removeBtn = document.createElement('button');
-                removeBtn.innerHTML = '×';
-                removeBtn.type = 'button';
-                removeBtn.style.position = 'absolute';
-                removeBtn.style.top = '0';
-                removeBtn.style.right = '0';
-                removeBtn.style.background = 'red';
-                removeBtn.style.color = 'white';
-                removeBtn.style.border = 'none';
-                removeBtn.style.borderRadius = '0 0 0 5px';
-                removeBtn.style.cursor = 'pointer';
-                removeBtn.style.padding = '2px 6px';
-                removeBtn.style.fontSize = '16px';
+                    removeBtn.onclick = function () {
+                        wrapper.remove();
+                        const index = selectedFilesEdit.indexOf(file);
+                        if (index > -1) {
+                            selectedFilesEdit.splice(index, 1);
+                        }
+                        updateHiddenInputs(hiddenContainer, selectedFilesEdit);
+                    };
 
-                removeBtn.onclick = function () {
-                    wrapper.remove();
-                    const index = selectedFilesEdit.indexOf(file);
-                    if (index > -1) {
-                        selectedFilesEdit.splice(index, 1);
-                    }
+                    // Gắn phần tử vào DOM
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(wrapper);
+
                     updateHiddenInputs(hiddenContainer, selectedFilesEdit);
                 };
+                reader.readAsDataURL(file);
+            });
 
-                // Gắn phần tử vào DOM
-                wrapper.appendChild(img);
-                wrapper.appendChild(removeBtn);
-                previewContainer.appendChild(wrapper);
+            input.value = '';
+        }
 
-                updateHiddenInputs(hiddenContainer, selectedFilesEdit);
-            };
-            reader.readAsDataURL(file);
-        });
+        function previewImages(input, previewId) {
+            const previewContainer = document.getElementById(previewId);
+            const hiddenContainer = document.getElementById(previewId.includes('add') ? 'hidden-images-add' : 'hidden-images-edit');
+            const selectedFiles = previewId.includes('add') ? selectedFilesAdd : selectedFilesEdit;
+            const currentImageCount = previewContainer.querySelectorAll('img').length;
+            const newImageCount = input.files.length;
+            const totalImages = currentImageCount + newImageCount;
 
-        input.value = ''; // Reset input
-    }
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+                selectedFiles.push(file);
 
-            function previewImages(input, previewId) {
-                const previewContainer = document.getElementById(previewId);
-                const hiddenContainer = document.getElementById(previewId.includes('add') ? 'hidden-images-add' : 'hidden-images-edit');
-                const selectedFiles = previewId.includes('add') ? selectedFilesAdd : selectedFilesEdit;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.style.display = 'inline-block';
+                    imgWrapper.style.position = 'relative';
 
-                // Đếm số lượng ảnh hiện tại trên giao diện
-                const currentImageCount = previewContainer.querySelectorAll('img').length;
-                const newImageCount = input.files.length;
-                const totalImages = currentImageCount + newImageCount;
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    img.style.maxWidth = '100px';
+                    img.style.margin = '5px';
 
-                // if (totalImages > 3) {
-                //     alert('Chỉ được chọn tối đa 3 ảnh phụ! Hiện tại đã có ' + currentImageCount + ' ảnh.');
-                //     input.value = '';
-                //     return;
-                // }
-
-                for (let i = 0; i < input.files.length; i++) {
-                    const file = input.files[i];
-                    selectedFiles.push(file);
-
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imgWrapper = document.createElement('div');
-                        imgWrapper.style.display = 'inline-block';
-                        imgWrapper.style.position = 'relative';
-
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'image-preview';
-                        img.style.maxWidth = '100px';
-                        img.style.margin = '5px';
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.innerHTML = '×';
-                        removeBtn.style.position = 'absolute';
-                        removeBtn.style.top = '0';
-                        removeBtn.style.right = '0';
-                        removeBtn.style.background = 'red';
-                        removeBtn.style.color = 'white';
-                        removeBtn.style.border = 'none';
-                        removeBtn.style.cursor = 'pointer';
-                        removeBtn.onclick = function() {
-                            imgWrapper.remove();
-                            const index = selectedFiles.indexOf(file);
-                            if (index > -1) {
-                                selectedFiles.splice(index, 1);
-                            }
-                            updateHiddenInputs(hiddenContainer, selectedFiles);
-                        };
-
-                        imgWrapper.appendChild(img);
-                        imgWrapper.appendChild(removeBtn);
-                        previewContainer.appendChild(imgWrapper);
-
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '×';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '0';
+                    removeBtn.style.right = '0';
+                    removeBtn.style.background = 'red';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.onclick = function() {
+                        imgWrapper.remove();
+                        const index = selectedFiles.indexOf(file);
+                        if (index > -1) {
+                            selectedFiles.splice(index, 1);
+                        }
                         updateHiddenInputs(hiddenContainer, selectedFiles);
                     };
-                    reader.readAsDataURL(file);
-                }
 
-                input.value = '';
+                    imgWrapper.appendChild(img);
+                    imgWrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(imgWrapper);
+
+                    updateHiddenInputs(hiddenContainer, selectedFiles);
+                };
+                reader.readAsDataURL(file);
             }
 
-            function updateHiddenInputs(container, files) {
-                container.innerHTML = '';
-                files.forEach((file, index) => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.name = 'product_images[]';
-                    input.style.display = 'none';
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    input.files = dataTransfer.files;
-                    container.appendChild(input);
-                });
-            }
+            input.value = '';
+        }
 
-            function validateForm(formId) {
-                const form = document.getElementById(formId);
-                let isValid = true;
-                const suffix = formId === 'addForm' ? '_add' : '_edit';
-                const isEditForm = formId === 'editForm';
+        function updateHiddenInputs(container, files) {
+            container.innerHTML = '';
+            files.forEach((file, index) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.name = 'product_images[]';
+                input.style.display = 'none';
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                container.appendChild(input);
+            });
+        }
 
-                const fields = [
-                    { id: `product_name${suffix}`, errorId: `errorten${suffix}`, message: 'Vui lòng nhập tên sản phẩm', required: true },
-                    { id: `main_image${suffix}`, errorId: `erroranh${suffix}`, message: 'Vui lòng chọn ảnh chính', checkFiles: true, required: !isEditForm },
-                    { id: `desc${suffix}`, errorId: `errormota${suffix}`, message: 'Vui lòng nhập mô tả', required: true },
-                    { id: `product_type${suffix}`, errorId: `errorloaisanpham${suffix}`, message: 'Vui lòng chọn loại sản phẩm', checkValue: '0', required: true },
-                    { id: `product_brand${suffix}`, errorId: `errorthuonghieu${suffix}`, message: 'Vui lòng chọn thương hiệu', checkValue: '0', required: true }
-                ];
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            let isValid = true;
+            const suffix = formId === 'addForm' ? '_add' : '_edit';
+            const isEditForm = formId === 'editForm';
 
-                fields.forEach(field => {
-                    const input = document.getElementById(field.id);
-                    const error = document.getElementById(field.errorId);
-                    const value = field.checkFiles ? input.files.length : input.value.trim();
+            const fields = [
+                { id: `product_name${suffix}`, errorId: `errorten${suffix}`, message: 'Vui lòng nhập tên sản phẩm', required: true },
+                { id: `main_image${suffix}`, errorId: `erroranh${suffix}`, message: 'Vui lòng chọn ảnh chính', checkFiles: true, required: !isEditForm },
+                { id: `desc${suffix}`, errorId: `errormota${suffix}`, message: 'Vui lòng nhập mô tả', required: true },
+                { id: `product_type${suffix}`, errorId: `errorloaisanpham${suffix}`, message: 'Vui lòng chọn loại sản phẩm', checkValue: '0', required: true },
+                { id: `product_brand${suffix}`, errorId: `errorthuonghieu${suffix}`, message: 'Vui lòng chọn thương hiệu', checkValue: '0', required: true }
+            ];
 
-                    let hasError = false;
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.errorId);
+                const value = field.checkFiles ? input.files.length : input.value.trim();
 
-                    if (field.required) {
-                        if (field.checkFiles) {
-                            const preview = document.getElementById(field.id.replace('main_image', 'main-image-preview'));
-                            if (value === 0 && (!preview || !preview.innerHTML)) {
-                                hasError = true;
-                            }
-                        } else if (value === '' || (field.checkValue && value === field.checkValue)) {
+                let hasError = false;
+
+                if (field.required) {
+                    if (field.checkFiles) {
+                        const preview = document.getElementById(field.id.replace('main_image', 'main-image-preview'));
+                        if (value === 0 && (!preview || !preview.innerHTML)) {
                             hasError = true;
                         }
+                    } else if (value === '' || (field.checkValue && value === field.checkValue)) {
+                        hasError = true;
                     }
+                }
 
-                    if (hasError) {
-                        error.textContent = field.message;
-                        error.style.display = 'block';
-                        isValid = false;
-                    } else {
-                        error.style.display = 'none';
-                    }
-                });
+                if (hasError) {
+                    error.textContent = field.message;
+                    error.style.display = 'block';
+                    isValid = false;
+                } else {
+                    error.style.display = 'none';
+                }
+            });
 
-                return isValid;
+            return isValid;
+        }
+
+        function resetForm(modalId, formId) {
+            const form = document.getElementById(formId);
+            form.reset();
+            const previewAdd = document.getElementById('image-preview-add');
+            const previewEdit = document.getElementById('image-preview-edit');
+            const hiddenAdd = document.getElementById('hidden-images-add');
+            const hiddenEdit = document.getElementById('hidden-images-edit');
+            if (modalId === 'add-modal' && previewAdd) {
+                previewAdd.innerHTML = '';
+                hiddenAdd.innerHTML = '';
+                selectedFilesAdd = [];
             }
-
-            function resetForm(modalId, formId) {
-                const form = document.getElementById(formId);
-                form.reset();
-                const previewAdd = document.getElementById('image-preview-add');
-                const previewEdit = document.getElementById('image-preview-edit');
-                const hiddenAdd = document.getElementById('hidden-images-add');
-                const hiddenEdit = document.getElementById('hidden-images-edit');
-                if (modalId === 'add-modal' && previewAdd) {
-                    previewAdd.innerHTML = '';
-                    hiddenAdd.innerHTML = '';
-                    selectedFilesAdd = [];
-                }
-                if (modalId === 'edit-modal' && previewEdit) {
-                    previewEdit.innerHTML = '';
-                    hiddenEdit.innerHTML = '';
-                    selectedFilesEdit = [];
-                    existingImagesEdit = [];
-                }
-                document.getElementById('main-image-preview-' + (modalId === 'add-modal' ? 'add' : 'edit')).innerHTML = '';
-                document.querySelectorAll(`#${modalId} .error`).forEach(error => error.style.display = 'none');
+            if (modalId === 'edit-modal' && previewEdit) {
+                previewEdit.innerHTML = '';
+                hiddenEdit.innerHTML = '';
+                selectedFilesEdit = [];
+                existingImagesEdit = [];
+            }
+            document.getElementById('main-image-preview-' + (modalId === 'add-modal' ? 'add' : 'edit')).innerHTML = '';
+            document.querySelectorAll(`#${modalId} .error`).forEach(error => error.style.display = 'none');
         }
 
         const changeImage = (image) => {
@@ -697,26 +782,22 @@
             });
         
         
-        fetch('/watch_store/admin/data/update_product.php', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert('Cập nhật thành công!');
-            document.getElementById('edit-modal').style.display = 'none';
-            window.location.reload();
-        })
-        .catch(err => {
-            console.error('Lỗi:', err.message);
-        });
-    }
-
+            fetch('/watch_store/admin/data/update_product.php', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert('Cập nhật thành công!');
+                document.getElementById('edit-modal').style.display = 'none';
+                window.location.reload();
+            })
+            .catch(err => {
+                console.error('Lỗi:', err.message);
+            });
+        }
 
         function editProduct(id) {
-            
-            
-
             if (id) {
                 $.ajax({
                 url: "../admin/data/getProductById.php", 
@@ -724,75 +805,67 @@
                 data: { id: id },
                 dataType: "json",
                 success: function (data) {
-                if (data) {
-                    $("#product_id_edit").val(data.maSanPham); 
-                    $("#product_name_edit").val(data.tenSanPham); 
-                    $("#desc_edit").val(data.mota);
-                    $("#product_type_edit").val(data.id_loai);
-                    $("#product_brand_edit").val(data.id_thuonghieu); 
+                    if (data) {
+                        $("#product_id_edit").val(data.maSanPham); 
+                        $("#product_name_edit").val(data.tenSanPham); 
+                        $("#desc_edit").val(data.mota);
+                        $("#product_type_edit").val(data.id_loai);
+                        $("#product_brand_edit").val(data.id_thuonghieu); 
 
-                    // Hiển thị ảnh chính nếu có
-                    if (data.hinhAnh) {
-                        $("#main-image-preview-edit").html(
-                            `<img src="${data.hinhAnh}" width="100" />`
-                        );
+                        // Hiển thị ảnh chính nếu có
+                        if (data.hinhAnh) {
+                            $("#main-image-preview-edit").html(
+                                `<img src="${data.hinhAnh}" width="100" />`
+                            );
+                        }
+
+                        if (data.anhphu) {
+                            existingImagesEdit = data.anhphu;
+                            let imagesHtml = "";
+                            console.log(existingImagesEdit)
+                            if(existingImagesEdit.length >= 1) {
+                                existingImagesEdit.forEach((img) => {
+                                let result = img.startsWith('../') ? img.substring(3) : img
+                                return imagesHtml += `<div style="position: relative; display: inline-block; width: 80px; height: 80px; margin: 5px;">
+                                                    <img
+                                                        src="${result}"
+                                                        style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                                                    />
+                                                    <div  class="remove-image"
+                                                        style="
+                                                        position: absolute;
+                                                        top: 0;
+                                                        right: 0;
+                                                        background: rgba(255, 0, 0, 0.8);
+                                                        color: white;
+                                                        padding: 2px 6px;
+                                                        cursor: pointer;
+                                                        font-weight: bold;
+                                                        border-radius: 0 0 0 5px;
+                                                        z-index: 1;
+                                                        "
+                                                        onclick="changeImage('${result}')"
+                                                    >
+                                                        ✖
+                                                    </div>
+                                                    </div>
+                                                    `;
+                                });
+                            $("#image-preview-edit").html(imagesHtml);
+                            }
+                        }
+                        $("#editForm").show();
                     }
-
-                    
-                    if (data.anhphu) {
-                        existingImagesEdit = data.anhphu;
-                        let imagesHtml = "";
-                        console.log(existingImagesEdit)
-                        if(existingImagesEdit.length >= 1) {
-                        existingImagesEdit.forEach((img) => {
-                            let result = img.startsWith('../') ? img.substring(3) : img
-                            return imagesHtml += `<div style="position: relative; display: inline-block; width: 80px; height: 80px; margin: 5px;">
-                                                <img
-                                                    src="${result}"
-                                                    style="width: 100%; height: 100%; object-fit: cover; display: block;"
-                                                />
-                                                <div  class="remove-image"
-                                                    style="
-                                                    position: absolute;
-                                                    top: 0;
-                                                    right: 0;
-                                                    background: rgba(255, 0, 0, 0.8);
-                                                    color: white;
-                                                    padding: 2px 6px;
-                                                    cursor: pointer;
-                                                    font-weight: bold;
-                                                    border-radius: 0 0 0 5px;
-                                                    z-index: 1;
-                                                    "
-
-                                                    onclick="changeImage('${result}')"
-                                                >
-                                                    ✖
-                                                </div>
-                                                </div>
-
-                                            `;
-                        });
-                        $("#image-preview-edit").html(imagesHtml);
-                    }
-                }
-
-                    $("#editForm").show();
-                }
-            },
-            error: function () {
-                alert("Lỗi khi lấy dữ liệu sản phẩm!");
-            },
-        });
+                },
+                error: function () {
+                    alert("Lỗi khi lấy dữ liệu sản phẩm!");
+                },
+            });
             
             } else {
                 alert("ID sản phẩm không hợp lệ!");
             }
-
-            
         }
-
-        
 
         document.querySelectorAll('.remove-image').forEach(element => {
             element.addEventListener('click', function() {
@@ -808,11 +881,6 @@
                 this.parentElement.remove();
             });
         })
-
-
-
-
-
 
         document.addEventListener('DOMContentLoaded', () => {
             const modals = {
@@ -861,6 +929,7 @@
         });
         // Đảm bảo modal ẩn khi tải trang
         document.getElementById('specModal').style.display = 'none';
+        const closeBtn = document.querySelector(".modal-spec .close");
 
         // Mở modal khi nhấp nút "Quản lý thông số"
         document.querySelectorAll('.btn-spec').forEach(btn => {
@@ -874,7 +943,7 @@
         });
 
         // Đóng modal
-        document.querySelector('.close').addEventListener('click', () => {
+        document.querySelector('.close-spec').addEventListener('click', () => {
             document.getElementById('specModal').style.display = 'none';
         });
         window.addEventListener('click', (e) => {

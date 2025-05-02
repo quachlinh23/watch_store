@@ -1,32 +1,39 @@
-<?php 
-    include '../class/employeelogin.php';
-    
-    $class = new adminlogin();
-	if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-		$username = $_POST['username'];
-		$password = md5($_POST['password']);
+<?php
+include '../class/employeelogin.php';
 
-		$login_check = $class->login_employee($username,$password);
-	}
+$class = new adminlogin();
+$er = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['username'], $_POST['password'])) {
+    $username = $_POST['username'];
+    $password = md5($_POST['password']);
+    $login_check = $class->login_employee($username, $password);
+    if ($login_check === true) {
+        $_SESSION['employee_logged_in'] = true;
+        $_SESSION['employee_username'] = $username;
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        $er = $login_check;
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập</title>
+    <title>Đăng nhập nhân viên</title>
     <link rel="stylesheet" href="css/login.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-    
-</style>
 </head>
 <body>
     <div class="login-container">
         <h2>Đăng nhập nhân viên</h2>
-        <form action="loginpage.php" method="POST">
+        <form action="" method="POST">
             <label for="username">Tên đăng nhập:</label>
-            <input type="text" id="username" name="username" placeholder="Tên đăng nhập">
+            <input type="text" id="username" name="username" placeholder="Tên đăng nhập" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
             <span id="emptyusername" style="display: none; color: red; font-weight: bold; text-align: left; margin-bottom: 10px;">Vui lòng nhập tên đăng nhập</span>
     
             <label for="password">Mật khẩu:</label>
@@ -57,12 +64,9 @@
         </form>
     
         <div class="extra-links">
-            <a href="#">Quên mật khẩu?</a> |
-            <a href="register.php">Bạn chưa có tài khoản? Đăng ký</a>
+            <a href="forgot_password.php">Quên mật khẩu?</a>
         </div>
     </div>
-    
-
 </body>
 <script>
     document.querySelector("form").addEventListener("submit", function(event) {

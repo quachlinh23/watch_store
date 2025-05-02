@@ -49,5 +49,26 @@
                 }
             }
         }
+
+        
+        public function getEmployeeByEmail($email) {
+            $email = mysqli_real_escape_string($this->db->link, $email);
+            $sql = "SELECT t.id, t.password, n.email, n.tenNhanVien 
+                    FROM tbl_taikhoannhanvien t
+                    JOIN tbl_nhanvien n ON t.id = n.id_taikhoan
+                    WHERE n.email = '$email'";
+            $result = $this->db->select($sql);
+            return $result ? $result->fetch_assoc() : false;
+        }
+    
+        public function updatePassword($id_taikhoan, $new_password) {
+            $new_password = md5($new_password); // Keep MD5 to match original logic
+            $sql = "UPDATE tbl_taikhoannhanvien SET password = ? WHERE id = ?";
+            $stmt = $this->db->link->prepare($sql);
+            $stmt->bind_param('si', $new_password, $id_taikhoan);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
     }
 ?>

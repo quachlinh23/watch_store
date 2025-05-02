@@ -68,7 +68,7 @@
         </form>
     
         <div class="extra-links">
-            <a href="#">Quên mật khẩu?</a> |
+            <a href="forgot_password.php">Quên mật khẩu?</a> |
             <a href="register.php">Bạn chưa có tài khoản? Đăng ký</a>
         </div>
     </div>

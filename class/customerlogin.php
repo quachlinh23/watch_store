@@ -107,5 +107,103 @@
             $result = $this->db->select($query);
             return $result;
         }
+
+        public function getCustomerByEmail($cust_email) {
+            $cust_email = mysqli_real_escape_string($this->db->link, $cust_email);
+            $sql = "SELECT t.id, t.password, n.email, n.tenkhachhang
+                    FROM tbl_taikhoan t
+                    JOIN tbl_khachhang n ON t.id = n.id_khachhang
+                    WHERE n.email = '$cust_email'";
+            $result = $this->db->select($sql);
+            if (!$result) {
+                error_log("getCustomerByEmail query failed: " . $this->db->link->error);
+                return false;
+            }
+            $cust_data = $result->fetch_assoc();
+            error_log("getCustomerByEmail fetched data: " . print_r($cust_data, true));
+            if ($cust_data) {
+                // Verify the id exists in tbl_taikhoan
+                $id_check_sql = "SELECT id FROM tbl_taikhoan WHERE id = '{$cust_data['id']}'";
+                $id_check_result = $this->db->select($id_check_sql);
+                if (!$id_check_result || !$id_check_result->fetch_assoc()) {
+                    error_log("Invalid tbl_taikhoan id: {$cust_data['id']}");
+                    return false;
+                }
+            }
+            return $cust_data ?: false;
+        }
+    
+        public function updatePassword($cust_id, $new_pass) {
+            if (!$this->db->link) {
+                error_log("Database connection failed: " . mysqli_connect_error());
+                return false;
+            }
+        
+            $cust_id = intval($cust_id);
+        
+            // Lấy account_id từ cust_id
+            $sql = "SELECT id_taikhoan FROM tbl_khachhang WHERE  id_khachhang = ?";
+            $stmt = $this->db->link->prepare($sql);
+        
+            if (!$stmt) {
+                error_log("Prepare failed: " . $this->db->link->error);
+                return false;
+            }
+        
+            $stmt->bind_param('i', $cust_id);
+            $stmt->execute();
+            $stmt->store_result();
+        
+            // Khai báo biến account_id
+            $account_id = null;
+        
+            // Kiểm tra nếu tìm thấy tài khoản
+            if ($stmt->num_rows === 0) {
+                error_log("No account found for cust_id: $cust_id");
+                $stmt->close();
+                return false;
+            }
+        
+            // Nếu tìm thấy tài khoản, lấy account_id
+            $stmt->bind_result($account_id); // Gắn giá trị trả về vào biến $account_id
+            $stmt->fetch();
+            $stmt->close();
+        
+            // Nếu không lấy được account_id, trả về false
+            if ($account_id === null) {
+                error_log("Failed to retrieve account_id.");
+                return false;
+            }
+        
+            // Mã hóa mật khẩu mới
+            $hashed_pass = md5($new_pass);
+        
+            // Cập nhật mật khẩu cho tài khoản
+            $sql_update = "UPDATE tbl_taikhoan SET password = ? WHERE id = ?";
+            $stmt_update = $this->db->link->prepare($sql_update);
+            if (!$stmt_update) {
+                error_log("Update prepare failed: " . $this->db->link->error);
+                return false;
+            }
+        
+            $stmt_update->bind_param('si', $hashed_pass, $account_id);
+            if (!$stmt_update->execute()) {
+                error_log("Update execute failed: " . $stmt_update->error);
+                $stmt_update->close();
+                return false;
+            }
+        
+            $affected_rows = $stmt_update->affected_rows;
+            $stmt_update->close();
+            if ($affected_rows === 0) {
+                error_log("No rows updated for account_id: $account_id (query executed but no changes)");
+                return false;
+            }
+        
+            error_log("Password updated successfully for account_id: $account_id");
+            return true;
+        }
+        
+        
     }
 ?>

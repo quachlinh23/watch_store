@@ -55,10 +55,10 @@
             // Xử lý ảnh phụ
             if (isset($files['product_images']) && !empty($files['product_images']['name']) && !empty($files['product_images']['name'][0])) {
                 $image_count = count(array_filter($files['product_images']['name']));
-                if ($image_count > 3) {
-                    $this->rollback($product_id, $main_image, []);
-                    return "Chỉ được chọn tối đa 3 ảnh phụ!";
-                }
+                // if ($image_count > 3) {
+                //     $this->rollback($product_id, $main_image, []);
+                //     return "Chỉ được chọn tối đa 3 ảnh phụ!";
+                // }
         
                 for ($i = 0; $i < $image_count; $i++) {
                     if (empty($files['product_images']['name'][$i])) continue;
